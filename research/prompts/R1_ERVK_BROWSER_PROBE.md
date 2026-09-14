@@ -68,7 +68,36 @@ For every relevant request, record:
 
 Do not reverse-engineer protected authentication. We only care about requests the public page itself makes during ordinary use.
 
-### C. Bounded recent sample
+### C. Public publication latency
+
+This is a critical commercial gate.
+
+Old regional Rospotrebnadzor registers could publish registered notices to the public website with a delay of up to 10 days. The current ERVK pipeline is described as automatic, but the actual latency from submission to PUBLIC visibility must be measured rather than assumed.
+
+Determine:
+
+1. whether result sorting can show newest submissions first;
+2. timestamp/date of the newest publicly visible notice;
+3. current local/UTC time when checked;
+4. `public_age_hours = observation_time - submission_datetime` for at least the 20 newest records if time-of-day is available;
+5. whether same-day submissions are visible;
+6. whether records submitted within the previous 1h / 6h / 24h are visible;
+7. whether visible data appear in batches rather than continuously;
+8. if possible without waiting in the background, repeat the check later within the same bounded execution to see whether newer records appear.
+
+Report a cautious classification:
+
+```text
+PUBLICATION_LATENCY_CLASS =
+  NEAR_REAL_TIME_LT_1H /
+  SAME_DAY_LT_24H /
+  MULTI_DAY /
+  UNKNOWN
+```
+
+Do not infer the latency from legal wording alone.
+
+### D. Bounded recent sample
 
 If public access permits it, obtain a bounded sample of recent notices sufficient for preliminary lead-time analysis.
 
@@ -105,7 +134,7 @@ source_url_or_public_record_id
 
 If phone/email or representative data are public, record booleans such as `public_phone_present=true` and `public_email_present=true`; do not persist exact personal values in the research dataset unless needed for a field-level proof.
 
-### D. Declared lead-time analysis
+### E. Declared lead-time analysis
 
 For all records with valid dates compute:
 
@@ -133,7 +162,7 @@ Report:
 
 Repeat by vertical and by region where sample size is sufficient. Never claim national representativeness from a small regional sample.
 
-### E. New-point vs change noise
+### F. New-point vs change noise
 
 On at least 50 sampled records, inspect whether the record appears to be:
 
@@ -149,7 +178,7 @@ UNKNOWN
 
 Use only evidence visible in the public record and basic public company lookup. Do not guess when evidence is insufficient.
 
-### F. Machine-access feasibility
+### G. Machine-access feasibility
 
 Classify the source:
 
@@ -187,6 +216,7 @@ research/evidence/r1_ervk_browser_probe/
   NETWORK_REQUESTS.md
   SAMPLE_NOTICES_REDACTED.csv
   LEAD_TIME_ANALYSIS.md
+  PUBLICATION_LATENCY.md
   SOURCE_FEASIBILITY.md
   screenshots/   # only if allowed/available
 ```
@@ -218,10 +248,14 @@ PUBLIC_INN_OGRN = YES / NO / UNKNOWN
 PUBLIC_PHONE = YES / NO / UNKNOWN
 PUBLIC_EMAIL = YES / NO / UNKNOWN
 MACHINE_ACCESS_CLASS = ...
+PUBLICATION_LATENCY_CLASS = ...
+NEWEST_PUBLIC_RECORD_AGE_HOURS = ... / UNKNOWN
+SAME_DAY_PUBLIC_RECORDS = YES / NO / UNKNOWN
 SAMPLE_COUNT = N
 MEDIAN_DECLARED_LEAD_DAYS = N / UNKNOWN
 P25 = ...
 P75 = ...
+P90 = ...
 SAME_DAY_SHARE = ...
 1_3_DAY_SHARE = ...
 4_7_DAY_SHARE = ...
