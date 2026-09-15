@@ -204,6 +204,46 @@ Cloudmaster уже работает в российской облачной э�
 
 Ferta и смежные сервисы уже мониторят изменения правил WB/Ozon. Не возвращаться к простой формулировке «алерт по новой оферте».
 
+### Contract renewal / auto-renewal management
+
+Document Relay/Bitrix24 workflows, Futura Legal и существующий договорной контур уже закрывают контроль сроков, автопролонгации и напоминаний. Отдельный западный renewal-calendar без более сильного workflow не считать gap.
+
+### Visual regression testing
+
+Российский Delta-QA уже предлагает no-code visual regression, on-prem и Storybook-сценарии; глобальные open-source/облачные инструменты также доступны. Ниша не пустая.
+
+### Third-party service/API status aggregation
+
+GMONIT, DownScope, Сбои.инфо, DETECTOR404 и глобальные StatusGator/IsDown-подобные продукты уже закрывают слой «внешний сервис упал/деградировал». Не смешивать с отдельным живым кандидатом по code-impact API changes.
+
+### Generic external API spec/changelog monitoring
+
+Обычный слой `OpenAPI/changelog changed -> diff -> alert` закрывается oasdiff, APIWatch, SpecFlag и другими SaaS/open-source решениями. Живой кандидат возможен только если продукт связывает upstream change с конкретным клиентским codebase и доводит до verified migration PR.
+
+### Email deliverability / inbox-placement testing
+
+В РФ уже появился Live Direct Marketing inbox-check: seed accounts, Gmail/Outlook/Mail.ru/Yandex, SPF/DKIM/DMARC, screenshots и API/MCP. Не считать отсутствующей категорией.
+
+### AI Search Visibility / GEO monitoring
+
+Российские spioniro.ru, GeoWatch, brandfound.ai и встроенная «Видимость сайта в Алисе AI» Яндекс Вебмастера уже закрывают мониторинг присутствия бренда/сайта в AI-ответах. Ниша не пустая.
+
+### Business caller reputation / spam-label monitoring
+
+Yandex, MTS, T-Bank и Beeline владеют значительной частью caller-ID source-of-truth, а Novotels уже предлагает «Здоровье номеров/Репутация номеров», мониторинг и помощь со снятием ложных spam-labels. Недостаточный gap.
+
+### Yandex Direct click-fraud detection / refund recovery
+
+Яндекс автоматически фильтрует/возвращает значимую часть недействительного трафика и принимает обращения по подозрительным кликам; UNTARGET.AI и другие инструменты уже работают с click-fraud для Директа. Не считать пустой recovery-категорией.
+
+### Automotive recall management / recall outreach
+
+Западная BizzyCar-механика доказана, но российский AutoCRM DNM уже умеет VIN-проверку отзывных кампаний, KPI, автоматическое назначение лида и работу recall-процесса дилера. Прямой функциональный overlap.
+
+### Marketplace product-card backup / versioned rollback
+
+Идея «Rewind для WB/Ozon» не является пустой нишей. MP Manager сохраняет историю редактирования характеристик на Wildberries/Ozon/Яндекс Маркете и позволяет восстановить прошлую версию; MarketGuru хранит сохранённые версии карточек, сравнивает их с текущей и применяет старую версию. Более широкий backup слой слишком легко расширить существующим seller-suite.
+
 ## Общие новые фильтры
 
 ### GENERAL_AI_SUBSTITUTION_GATE
