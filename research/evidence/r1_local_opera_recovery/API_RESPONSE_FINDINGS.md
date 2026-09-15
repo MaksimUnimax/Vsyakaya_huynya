@@ -1,14 +1,17 @@
-# R1 — ERVK public list API response findings
+# R1 — ERVK public API response findings
 
 ## Status
 
 `PUBLIC_LIST_XHR_SCHEMA = CONFIRMED`
+`PUBLIC_DETAIL_SCHEMA = CONFIRMED_ON_MULTIPLE_RECORDS`
 
-Source: live `Fetch/XHR` response for the public ERVK list request observed in the owner's local Opera browser on 2026-09-15.
+Source: live public ERVK `Fetch/XHR` traffic observed in the owner's local Opera browser on 2026-09-15.
 
-Observed request label in DevTools:
+## Public list endpoint
 
-`notices?page=0&size=10`
+Confirmed full Request URL:
+
+`https://ervk.gov.ru/portal/public/widgets/notices?page=0&size=10`
 
 The response was HTTP 200 and returned a JSON object with:
 
@@ -18,7 +21,7 @@ The response was HTTP 200 and returned a JSON object with:
 - `totalElements`;
 - `totalPages`.
 
-## Public list record schema
+### Public list record schema
 
 Each record in `notices` exposed these fields:
 
@@ -46,11 +49,9 @@ Important negatives: this list endpoint did NOT expose, in the observed response
 - email;
 - status/history/change dates.
 
-Those identifiers are nevertheless visible in the expanded public card, which implies either a separate detail endpoint/request or separately loaded detail data.
-
 ## Freshness evidence
 
-The first records in the public API response had `noticeDate = 2026-09-15`, matching the current calendar day of observation. The public UI simultaneously showed 1,327,899 total elements after refresh.
+The first records in the public API response had `noticeDate = 2026-09-15`, matching the current calendar day of observation. The public UI simultaneously showed more than 1.327 million total elements.
 
 This confirms same-calendar-day public list freshness, but not exact publication latency because `noticeDate` is date-only and its canonical meaning still needs confirmation.
 
@@ -85,23 +86,96 @@ Notable activity categories include:
 
 The response therefore supports vertical filtering far beyond HoReCa/retail.
 
+## Public detail response — confirmed fields
+
+Two separate current records were inspected through the public expanded-card/detail response:
+
+- `id = 1407077`, notice `У003/001407077`, `Магазин "SNAX"`;
+- `id = 1407075`, notice `У003/001407075`, `Хороший День`.
+
+Both returned the same detail structure.
+
+Confirmed detail fields:
+
+```text
+id
+number
+noticeDate
+controlObject.name
+controlObject.address
+controlObject.regionCode
+controlObject.regionTitle
+controlOrgan.code
+controlOrgan.title
+controlOrgan.ogrn
+controlOrgan.agencyType
+legalEntity.type
+legalEntity.typeRecordId
+legalEntity.inn
+legalEntity.ogrnip OR ogrn where applicable
+legalEntity.lastName / firstName / middleName for IP
+legalEntity.okvedList.basicOKVED[]
+legalEntity.okvedList.additionsOKVED[]
+legalEntity.synchronizationDttm
+activity.code
+activity.title
+activity.workAndServiceCode
+activity.workAndServiceTitle
+okvedList
+terminated
+```
+
+### Critical negative result
+
+Across both observed detail responses there was NO field corresponding to:
+
+- declared / planned activity start date;
+- submission datetime;
+- createdAt / filing timestamp;
+- phone;
+- email;
+- notice status beyond `terminated`;
+- modification/history timestamps.
+
+Therefore the original pre-opening lead-time hypothesis cannot be measured from the ordinary list + detail responses alone.
+
+### `synchronizationDttm` interpretation boundary
+
+Observed examples:
+
+- `2026-09-15T02:00:43.026+00:00`
+- `2026-09-15T02:00:43.966+00:00`
+
+This timestamp is nested under `legalEntity`, not the notice object. It is therefore treated as legal-entity synchronization metadata, NOT as notice submission time, unless future primary evidence proves otherwise.
+
+The nearly identical timestamps on different entities further support a batch/entity-sync interpretation rather than individual notice filing time.
+
+## Feature-toggle clue for history
+
+A live feature-toggle response observed in DevTools included:
+
+`ervk.history.ERVK-6637 = enabled`
+
+This is not evidence that a public history endpoint exists, but it is a concrete clue that history functionality exists somewhere in the ERVK frontend/backend. A bounded public-network probe should therefore check whether expanding/changing UI state triggers a separate history/revisions endpoint.
+
 ## Commercial implication
 
-The public list endpoint itself is already useful for:
+The public API is stronger than initially expected for a physical-point feed:
 
-`new/changed physical-point detection -> vertical filter -> region filter -> address/name enrichment`
+`same-day current notice -> exact physical address -> vertical/activity -> INN/OGRN enrichment`
 
-But it is insufficient by itself for the original pre-opening lead-time thesis because it does not expose `declared start date` in the observed response.
+But the strongest proposed moat — `declared future start date` — is not exposed in the normal list/detail payloads observed so far.
 
-The next required evidence is the detail request/endpoint triggered by expanding a card, because the expanded public UI exposes at least INN and OGRN/OGRNIP.
+Therefore R1 currently splits into two possible theses:
+
+1. `PRE_OPEN_LEAD_FEED` — remains unproven and depends on discovering a legitimate public history/metadata endpoint or another official source containing declared start date.
+2. `SAME_DAY_PHYSICAL_POINT_EVENT_FEED` — technically supported by the current public API, but commercially weaker and must beat maps/contact databases on freshness.
 
 ## Next probe
 
-In DevTools Network, expand a current notice and identify any new `Fetch/XHR` request generated at that moment. Capture:
+Required next evidence:
 
-- request name;
-- full Request URL;
-- response JSON;
-- whether it includes entity identifiers, filing timestamp, declared start date, status/change history.
-
-Also capture the full Request URL of the public list endpoint from `Headers` so the base API host/path can be recorded exactly.
+1. capture the exact Request URL of the detail request;
+2. inspect Network for any public request triggered by history/revision UI state;
+3. inspect whether page/filter requests accept stable query parameters for activity/region/OKVED;
+4. if no public start-date field exists anywhere, pivot R1 analysis away from claimed pre-open timing and test actual freshness vs Yandex/2GIS/industry databases.
