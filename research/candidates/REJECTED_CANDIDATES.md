@@ -38,7 +38,7 @@
 
 Подробно: `B1_ECOMMERCE_SELF_SERVICE_RETURNS.md`.
 
-## KILL — российский рынок уже занят
+## KILL — российский рынок уже занят / gap недостаточен
 
 ### Marketplace reimbursement / recovery для WB/Ozon
 
@@ -95,6 +95,114 @@ BillogicPlatform, LBX Billing, BillBill, айФлекс, Paypilot, BillControl, 
 ### Freight invoice audit / generic logistics overcharge audit
 
 Российский CargoAudit AI уже заявляет success-fee поиск переплат в транспортных счетах. Не возвращаться к общей формулировке «parcel/freight audit» без принципиально новой механики.
+
+### Interactive product demos / browser-recorded demos
+
+Российский Demiqo уже продаёт запись браузерного сценария и превращение его в интерактивное демо. Ниша не пуста.
+
+### Browser bug capture / technical repro capture
+
+Kaiten уже имеет browser recording workflow, а open-source OpenReplay Spot умеет видео + console + network + user-agent. Локализация такого слоя слишком легко копируется и не даёт достаточного moat.
+
+### Feature flags / remote config
+
+Зрелые self-hosted/open-source Unleash, Flagsmith, GrowthBook, FeatBit делают российскую локализацию слабой возможностью без отдельного distribution wedge.
+
+### Digital Sales Room / deal room
+
+Оферта24 в Битрикс24 и Tartip уже дают digital sales room / живое КП / аналитику открытия материалов. Не считать отсутствующей категорией.
+
+### Affiliate/referral management для SaaS
+
+Recca и Track360 уже закрывают embedded/API affiliate mechanics. Ниша не пуста.
+
+### Video testimonials collection
+
+Proofwall, Видвиджет и смежные продукты уже закрывают сбор/публикацию видео-отзывов.
+
+### Feedback board + public roadmap + changelog
+
+FeedBackTalk существует локально; open-source Fider делает категорию очень легко воспроизводимой. Слабый moat.
+
+### PagerDuty / on-call incident routing
+
+AlertDuty.ru прямо позиционируется как российский аналог PagerDuty и даёт расписания, эскалации, Telegram/SMS/звонки, интеграции мониторинга. Ниша уже замечена рынком.
+
+### Product registration / QR digital warranty / post-purchase portal
+
+Warrantex и «Паспорт Товара» уже предлагают QR, цифровую гарантию, документы, обращения и post-purchase contact layer. Не считать пустой категорией.
+
+### Jobsite photo documentation / CompanyCam class
+
+Planado и Okdesk уже умеют фото «до/после», гео/время, отчёты и клиентские процессы. Категория поглощена FSM-продуктами.
+
+### Cloud-to-cloud backup for Yandex 360
+
+ROC Backup и +Альянс Бэкап уже дают резервирование и granular restore сервисов Яндекс 360. Не считать санкционным вакуумом.
+
+### SaaS spend management
+
+Российские продукты уже существуют, включая Buvei. Не возвращаться как к «западной категории без аналога» без принципиально нового wedge.
+
+### Product-led sales / PQL
+
+КОМЕТУМ уже заявляет PQL по продуктовым событиям и связанные sales/retention workflows. Ниша не пуста.
+
+### Customer Success health scoring
+
+КОМЕТУМ уже имеет индекс здоровья, плейбуки, retention-задачи и прогнозы продления. Не считать отсутствующей категорией.
+
+### API-first software licensing
+
+Guardant Station / Guardant SLK и API уже закрывают современное лицензирование, облачную активацию и кроссплатформенные сценарии. Ниша не пуста.
+
+### Embedded integrations platform / unified API / white-label connectors
+
+Albato Embedded уже даёт SaaS-разработчикам white-label/iframe/API слой и 1000+ коннекторов, включая 1С, Битрикс24, Ozon/WB. Не считать пустым WorkOS/Merge/Paragon-подобным gap.
+
+### CSV/XLSX importer-as-a-service
+
+Прямой российский лидер не найден, но зрелые open-source ImportCSV/TableFlow/react-csv-importer дают mapping/validation/XLSX. Локализация слишком легко копируется, moat слабый.
+
+### Client onboarding / implementation portal
+
+Planfix и Kaiten уже дают шаблоны проектов, внешний доступ и клиентские порталы. Специализацию уровня Rocketlane можно сравнительно легко собрать поверх универсального PM; недостаточный moat.
+
+### Content/document request portal / Content Snare class
+
+F.Doc уже умеет список обязательных документов, SMS-ссылку, загрузку, accept/reject/reupload; Saby поддерживает обязательные document-request этапы. Ниша не пуста.
+
+### AI data-loss gateway / LLM DLP
+
+Российский рынок уже заполнен INFERA AI.Firewall, SolidWall AI Security Gateway, Platform V SOWA AI, StarGuard AI, HiveTrace и другими. Не считать новой санкционной дырой.
+
+### WB/Ozon fines / appeals automation
+
+PINDI, НеОтдам, ПРЕТЕНЗОР.РФ, Selleru AI, Refundly и профильные юристы уже автоматизируют поиск штрафов/удержаний, сбор доказательств и подготовку/ведение оспаривания.
+
+### Creator / affiliate attribution for WB/Ozon brands
+
+WB Инфлюенс уже работает по CPO и показывает переходы, корзины, покупки и выручку; Ozon Blogger использует реферальные ссылки/заказы. Площадки сами владеют source-of-truth attribution.
+
+### DMARC / email-domain protection
+
+Есть локальные сервисы и большое число глобальных/open-source решений. Локализация не создаёт достаточного moat.
+
+### Webhook reliability / webhook delivery infrastructure
+
+Глобальные/open-source решения и локальные adjacent notification products делают категорию слишком легко доступной без отдельного сильного wedge.
+
+### Status page / uptime notification infrastructure
+
+PingDesk, Notifly и глобальные/open-source продукты закрывают категорию. Не считать gap.
+
+### FinOps / cloud-cost optimization for Russian clouds
+
+Cloudmaster уже работает в российской облачной экосистеме, плюс нативные бюджеты/billing крупных облаков закрывают базовый слой. Не считать очевидной пустой нишей.
+
+### Generic marketplace rules/offerta monitoring
+
+Ferta и смежные сервисы уже мониторят изменения правил WB/Ozon. Не возвращаться к простой формулировке «алерт по новой оферте».
 
 ## Общие новые фильтры
 
