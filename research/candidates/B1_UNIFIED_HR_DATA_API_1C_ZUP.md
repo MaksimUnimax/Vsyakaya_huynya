@@ -1,190 +1,239 @@
 # B1 — Unified HR Data API / Finch for Russian HR SaaS
 
-Дата: 2026-09-16
+Дата закрытия: 2026-09-16
 
-Статус: `PROMISING__DEEP_RESEARCH_REQUIRED__DATA_TRUST_AND_CUSTOM_1C_RISK`
+Статус: `KILL__DUPLICATE_OF_REJECTED_1C_HRIS_THESIS__STANDARD_IS_COMMODITY_CUSTOM_IS_PROJECT`
 
-## Коротко
+## Идея
 
 Developer-facing слой для российских HR/benefits/IDM/employee-SaaS:
 
 `1С:ЗУП / БОСС-Кадровик / другие кадровые источники`
-→ локальный connector/agent
-→ нормализованная схема `company / employee / department / position / employment event`
-→ единый API + webhooks для SaaS-разработчика.
+→ local connector/agent
+→ normalized `company / employee / department / position / employment event`
+→ единый REST API + webhooks.
 
-Цель — не делать HRM и не заменять 1С. Цель — убрать повторяющуюся разработку и сопровождение индивидуальных кадровых интеграций у каждого SaaS-вендора.
+Свежая формулировка намеренно исключала payroll/tax и пыталась спасти идею двумя ограничениями:
 
-## Demand proved abroad
+1. только сравнительно стандартные employee/org/lifecycle objects;
+2. local/on-prem agent, чтобы не требовать полного cloud access к ЗУП.
 
-Finch — зрелый unified HRIS/payroll API. Он стандартизует данные разных HRIS/payroll providers в одну модель, поддерживает 250+ провайдеров, webhooks, sandbox и единый developer API. В 2026 сама категория включает Finch, Merge, Kombo, Bindbee, Truto, Knit, Apideck и другие.
+После control pass это не создаёт новую возможность. Кандидат является более узкой версией уже закрытого `B1_UNIFIED_1C_HRIS_API_RU.md` и не устраняет его structural kill.
+
+## Уже существующий canonical reject
+
+В репозитории ранее закрыт:
+
+`B1_UNIFIED_1C_HRIS_API_RU.md`
+
+со статусом:
+
+`KILL__STANDARD_LAYER_COMMODITIZED__HIGH_VALUE_LAYER_BECOMES_CUSTOM_INTEGRATION`.
+
+Reopen condition той карточки требовал одновременно доказать:
+
+- highly standardized source objects;
+- many independent SaaS vendors needing the same integration;
+- absence of native/canonical integration infrastructure;
+- low per-customer customization;
+- willingness to pay for abstraction rather than an integration project.
+
+Новая карточка не прошла эти условия.
+
+## Что подтвердилось — recurring problem существует
+
+Российские HR/LMS/IDM/KEDO/expense продукты действительно снова и снова строят похожие интеграции с 1С:ЗУП.
+
+Примеры:
+
+- HRBP.ru синхронизирует оргструктуру, сотрудников, должности, managers, hire/termination/transfer;
+- 1IDM использует специализированный 1С:ЗУП connector и универсальные JSON/REST варианты;
+- Directum HR Pro поставляет расширение для 1С:ЗУП;
+- Raketa устанавливает extension в 1С и синхронизирует через API/token;
+- МояКоманда имеет готовую интеграцию 1С:ЗУП;
+- Контур.КЭДО/другие HR vendors используют свои модули/коннекторы;
+- отдельные интеграторы продают проекты по обмену employee/org/lifecycle data.
+
+Это доказывает повторяемость engineering task, но не отдельную platform economics.
+
+## Критический split №1 — стандартная ЗУП уже дёшева и типизируема
+
+### 1IDM
+
+1IDM прямо описывает простой сценарий:
+
+- 1С:ЗУП не кастомизировалась либо изменения не затрагивают объекты чтения;
+- устанавливается готовое расширение с HTTP service;
+- используется специализированный connector `HR 1C:ЗУП 3.1`;
+- заявленная скорость интеграции — от 10 минут.
+
+Источник:
+
+- https://1idm.ru/novostdetalno_10_10300/
+
+### HRBP.ru
+
+HRBP пишет:
+
+- для стандартной 1С:ЗУП 3.1 используется готовый набор API endpoints;
+- готовый connector настраивается без программирования;
+- типичный запуск интеграции — несколько рабочих дней;
+- синхронизируются именно те сущности, которые предлагались как V0 нового Finch-layer: org structure, employees, positions, managers, hire, termination, transfer.
+
+Источник:
+
+- https://hrbp.ru/blog/integratsiya-hr-platformy-s-1c-zachem-i-kak
+
+Следствие:
+
+> narrowing to employee/org/lifecycle does not rescue the thesis; it places the product precisely in the most standardized part of the integration problem.
+
+## Критический split №2 — изменённая ЗУП снова превращает слой в integration project
+
+Тот же 1IDM прямо разделяет второй сценарий:
+
+- в ЗУП значительно изменены объекты сбора данных;
+- либо действует собственная enterprise integration policy;
+- требуется собственный HTTP service returning HR data as JSON;
+- либо нужно адаптировать agent/connector под изменённый состав объектов и методов;
+- нужны компетенции 1С-разработчика.
+
+Источник:
+
+- https://1idm.ru/novostdetalno_10_10300/
+
+HRBP также отдельно указывает, что Enterprise integration настраивается индивидуально с учётом специфики customer 1C configuration.
+
+Источник:
+
+- https://hrbp.ru/blog/integratsiya-hr-platformy-s-1c-zachem-i-kak
+
+Это именно исходный structural kill:
+
+`standard employer -> reusable connector already cheap`
+
+`valuable complex employer -> per-customer mapping/development/support`.
+
+## Российская стоимость подтверждает project economics
+
+Публичные integration offers показывают, что buyer уже может купить bounded project вместо отдельной инфраструктурной подписки.
+
+Примеры:
+
+- Контур.КЭДО ↔ 1С:ЗУП: 79,900 RUB, 20 рабочих дней; includes employee mapping, кадровые номера, departments, hire/transfer/re-hire rules, queue/logging/statuses;
+- SAP SuccessFactors ↔ 1С:ЗУП: 49,900 RUB, 12 рабочих дней; employee/employment/position/department/events mapping, delta sync, hire/transfer/termination test cases.
 
 Источники:
-- https://www.tryfinch.com/finch-api
-- https://www.tryfinch.com/integrations
-- https://www.tryfinch.com/blog/best-unified-apis-hris-payroll
 
-## Российское evidence повторяющейся боли
+- https://5factor.ru/uslugi/integracii-i-avtomatizaciya/integraciya-kontur-kedo-1c-zup/
+- https://5factor.ru/uslugi/integracii-i-avtomatizaciya/kadrovye-dannye-sap-successfactors-1c-zup/
 
-На российском рынке не найден прямой публично заявленный аналог Finch, который продаётся разработчику как neutral multi-customer normalized HR API.
+Это не universal benchmark цен рынка, но показывает существующий substitution path: один раз купить интеграционный проект за десятки тысяч рублей.
 
-При этом повторяющаяся интеграционная работа видна у многих независимых продуктов:
+Для Finch-like vendor это опасно: SaaS customer должен иметь достаточно много employer connections, чтобы recurring platform fee + onboarding выигрывали у собственного connector/project.
 
-- HRBP.ru отдельно синхронизирует 1С:ЗУП: сотрудники, должности, оргструктура, приём/увольнение/перевод;
-- Directum HR Pro поставляет отдельное расширение/коннектор для 1С:ЗУП и других кадровых систем;
-- 1IDM поддерживает специальные и универсальные коннекторы и прямо описывает необходимость собственного HTTP-сервиса/адаптации при изменённой ЗУП;
-- Timetta имеет собственный коннектор 1С:ЗУП для НСИ и кадровых событий;
-- Websoft прямо пишет, что файловый обмен с 1С занимал много времени и ресурсов и поэтому был заменён API-интеграцией;
-- Bitrix24 имеет штатный коннектор ЗУП, который продолжает активно дорабатываться;
-- БОСС создал отдельный mapping/extension для связи с ЗУП;
-- отдельная интеграция `Контур.КЭДО ↔ 1С:ЗУП` продаётся как проект примерно за 79 900 ₽ и 20 рабочих дней.
+## Local agent не является новым moat
 
-Это не доказывает TAM, но подтверждает один и тот же engineering problem у большого числа российских SaaS/enterprise-продуктов.
+Новая карточка пыталась использовать:
 
-## Почему это не Albato / generic iPaaS
+`agent inside customer network -> filter/normalize -> outbound TLS -> minimum fields`.
 
-Albato и другие iPaaS соединяют приложения и поля, но основной продукт здесь — стабильная canonical employment model и lifecycle semantics:
+Архитектурно это разумно, но рынок уже использует тот же pattern:
 
-- организация;
-- сотрудник;
-- подразделение;
-- должность;
-- manager relation;
-- дата найма;
-- увольнение;
-- перевод;
-- статус;
-- webhook об изменении;
-- source identifiers/versioning;
-- health/status соединения.
+- 1IDM ставит extension/HTTP service на стороне ЗУП;
+- Raketa ставит расширение в 1С и авторизует через token;
+- другие HR/KEDO vendors используют встраиваемые modules/connectors.
 
-Клиент интегрируется с одной схемой и не должен понимать внутренние объекты каждой конфигурации 1С/HRM.
+Источники:
 
-## Главный российский технический wedge
+- https://1idm.ru/novostdetalno_10_10300/
+- https://raketa.world/1c_connector
 
-### Local/on-prem agent
+То есть local connector — deployment technique, а не defensibility.
 
-Из-за ФЗ-152 и чувствительности кадровых данных оптимальная архитектура не должна требовать прямого открытия 1С наружу или полной выгрузки базы в чужое облако.
+## 1С сама владеет canonical-integration primitives
 
-Предпочтительный вариант:
+На 2026-09-16 `1С:Интеграция КОРП` остаётся активным продуктом; актуальный релиз `1.0.5.1` датирован 15.07.2026.
 
-`agent/расширение внутри сети клиента`
-→ читает разрешённые кадровые объекты
-→ нормализует/фильтрует
-→ инициирует исходящее TLS-соединение
-→ наружу уходит только минимально разрешённый набор полей.
+Официально заявлены:
 
-Для high-trust клиентов возможен полностью self-hosted gateway.
+- каноническая модель данных;
+- configurable conversion rules;
+- universal 1C connector;
+- registration of object changes;
+- transport layer;
+- routing;
+- logs/monitoring;
+- support for multiple BSP versions;
+- integration with external systems.
 
-## MVP
+Источники:
 
-Не трогать зарплаты, налоги и payroll на первом этапе.
+- https://solutions.1c.ru/catalog/integracorp
+- https://solutions.1c.ru/catalog/integracorp/features
 
-V0:
-1. connector для типовой 1С:ЗУП 3.1;
-2. company / departments / employees / positions;
-3. hire / transfer / termination events;
-4. canonical REST API;
-5. webhook on change;
-6. connection health/logs;
-7. field allowlist;
-8. sandbox/test dataset;
-9. SDK для SaaS-разработчика.
+Это не direct Finch SaaS, но означает, что canonical normalization/connectivity itself is not an empty technical space.
 
-V1:
-- custom-field mapping;
-- БОСС-Кадровик / второй HR source;
-- write-back только после доказанного спроса;
-- self-hosted gateway.
+## Почему employee/org-only scope всё равно не проходит reopen gate
 
-## OWNER_VERIFIABILITY_GATE
+### Highly standardized source objects
 
-Проходит.
+Частично да — и именно поэтому готовые connectors уже запускаются быстро.
 
-На контролируемой тестовой базе можно создать 20 сотрудников и заранее известные события:
+### Many independent SaaS vendors
 
-`hire -> department transfer -> manager change -> termination`.
+Да, repeated demand exists.
 
-Проверяется:
-- API возвращает ровно ожидаемые записи;
-- webhook приходит один раз и с правильным событием;
-- запрещённые поля не выходят наружу;
-- после изменения в source canonical state обновляется;
-- лог показывает источник/время/ошибку.
+### No native/canonical platform
 
-Предметная HR-экспертиза для проверки базового transport/mapping результата не нужна.
+Нет. 1С Integration Corp / vendor-specific connectors / integration middleware already cover primitives.
 
-## GENERAL_AI_SUBSTITUTION_GATE
+### Low customization per customer
 
-Проходит.
+Только для типовой конфигурации. Valuable/custom enterprise cases explicitly require adaptation.
 
-LLM может написать конкретный коннектор, но не заменяет постоянно работающий fleet агентов, compatibility matrix, schema normalization, sync state, webhooks и многолетнее сопровождение версий/кастомизаций.
+### Clear willingness to pay for unified API instead of project
 
-## DATA_TRUST_GATE
+Не доказано. Public market evidence пока показывает willingness to pay for a connector/module/project, а не neutral multi-tenant developer API.
 
-Главный риск.
+Следовательно reopen condition не выполнен.
 
-Кадровые данные чувствительны. Кандидат допустим только при data-minimization и local-agent архитектуре. Если MVP потребует `дайте нам полный доступ к вашей ЗУП в облако`, кандидат должен быть закрыт.
+## Gates
 
-## Главный риск — кастомизированная 1С
+### OWNER_VERIFIABILITY_GATE
 
-1IDM прямо отмечает: для изменённой ЗУП может потребоваться собственный HTTP-сервис и адаптация. Это означает одновременно:
+Проходил хорошо. API state/events можно детерминированно тестировать.
 
-- потенциальный moat через накопленную compatibility/adapters knowledge;
-- высокий support-cost;
-- риск превратиться из SaaS в интегратора.
+### GENERAL_AI_SUBSTITUTION_GATE
 
-Kill gate: если >20–30% первых целевых клиентов требуют уникальной ручной разработки, модель становится слишком сервисной.
+Также проходил: runtime connector fleet не заменяется разовым LLM prompt.
 
-## Direct / adjacent competition
+### DATA_TRUST_GATE
 
-Найдены продуктовые коннекторы у конкретных вендоров (Directum, 1IDM, HRBP, Timetta, Bitrix24, БОСС, Websoft) и generic integration services, но в bounded sweep не найден neutral developer platform с моделью:
+Local agent снижает risk, но не создаёт business moat. Enterprise customers всё равно требуют deployment/security/integration work.
 
-`одна интеграция SaaS -> многие работодатели с 1С/HRM -> единая schema/webhooks`.
+### MARKET STRUCTURE / DEFENSIBILITY GATE
 
-Это не доказательство полного отсутствия скрытого конкурента.
+Не проходит.
 
-## Distribution / ICP
+## Не возвращаться как
 
-Не продавать работодателю напрямую на первом этапе.
+- `Finch for 1C:ZUP`;
+- unified employee API for Russian HR SaaS;
+- local-agent employee/org gateway;
+- one API for hire/transfer/termination from 1C;
+- HRIS abstraction without payroll;
 
-Первичный ICP:
-- HR-tech SaaS;
-- КЭДО;
-- LMS/employee experience;
-- IDM/IAM;
-- корпоративные benefits/ДМС/страхование;
-- time tracking/workforce tools;
-- travel/expense platforms, которым нужна структура сотрудников;
-- B2B SaaS, которому нужно автоматическое provisioning/offboarding из кадрового источника.
+если нет принципиально нового narrower source/workflow, который одновременно:
 
-Один SaaS-клиент затем потенциально приносит десятки/сотни employer connections.
+1. стандартизирован у большинства employers;
+2. ещё не имеет cheap reusable connectors/native integration;
+3. не требует per-customer 1C development;
+4. имеет доказанный buyer population with many repeated employer connections;
+5. имеет WTP выше стоимости bounded integration project.
 
-## Следующий kill test
+## Final status
 
-1. Собрать минимум 50 российских SaaS/enterprise-продуктов, которым нужны employee/org data.
-2. Для каждого определить: есть ли 1С:ЗУП connector, сколько стоила/заняла интеграция, есть ли maintenance pain.
-3. Найти минимум 15 продуктовых/engineering руководителей и проверить willingness-to-pay за connector-as-infrastructure вместо собственного кода.
-4. На 10 реальных/демо конфигурациях ЗУП измерить долю, которую покрывает один типовой agent без ручной доработки.
-5. Проверить direct competitors и 1С Marketplace/партнёрские продукты глубже.
+`KILL__DUPLICATE_OF_REJECTED_1C_HRIS_THESIS__STANDARD_IS_COMMODITY_CUSTOM_IS_PROJECT`
 
-## Предварительная оценка
-
-`7.2/10` как исследовательский кандидат.
-
-Сильные стороны:
-- доказанная зарубежная категория;
-- повторяющаяся российская инженерная работа уже видна;
-- крупная установленная база 1С:ЗУП/российских HR-систем;
-- хороший owner-verifiability;
-- generic AI не заменяет runtime;
-- compatibility library может накапливать moat.
-
-Слабые стороны:
-- чувствительные данные;
-- кастомные конфигурации 1С;
-- высокий риск service-heavy onboarding;
-- прямой TAM developer-platform пока не измерен;
-- 1С/крупные HR-вендоры теоретически могут выпустить более стандартный API layer.
-
-Статус: `PROMISING__DEEP_RESEARCH_REQUIRED__DATA_TRUST_AND_CUSTOM_1C_RISK`, не GO.
+Повторяющаяся техническая боль реальна. Но новая формулировка не устранила уже установленную причину отказа; держать её как отдельный PROMISING candidate было бы противоречием reject-registry.
