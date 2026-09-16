@@ -1,0 +1,110 @@
+{
+  "fixture_version": "1.0",
+  "date": "2026-09-16",
+  "purpose": "Owner-verifiable synthetic acceptance fixture for Retail Deduction Recovery pre-pilot. No legal conclusions or product authorization.",
+  "supplier": {
+    "supplier_sample_id": "SUP-DEMO-001",
+    "retailer_code": "DEMO_RETAIL",
+    "edi_provider": "DEMO_EDI",
+    "food_supplier": true,
+    "timezone": "Europe/Moscow"
+  },
+  "rules": [
+    {
+      "rule_id": "R_ACTIVE_CONSENT",
+      "effective_from": "2026-03-01",
+      "penalty_reason_family": "shortage_non_delivery",
+      "consent_basis": "active_supplier_confirmation",
+      "human_review_before_external_action": true
+    },
+    {
+      "rule_id": "R_SHORTAGE_10PCT",
+      "effective_from": "2026-01-01",
+      "penalty_reason_family": "shortage",
+      "formula_type": "percent_of_value",
+      "percent": 10,
+      "calculation_base": "confirmed_but_not_accepted_value",
+      "human_review_before_external_action": true
+    }
+  ],
+  "orders": [
+    {"order_id":"O001","version":1,"created_at":"2026-04-01T09:00:00+03:00","sku":"SKU-A","ordered_qty":100,"unit_price_rub":1000,"status":"ACTIVE"},
+    {"order_id":"O002","version":1,"created_at":"2026-04-02T09:00:00+03:00","sku":"SKU-B","ordered_qty":100,"unit_price_rub":1000,"status":"ACTIVE"},
+    {"order_id":"O003","version":1,"created_at":"2026-04-03T09:00:00+03:00","sku":"SKU-C","ordered_qty":120,"unit_price_rub":1000,"status":"SUPERSEDED"},
+    {"order_id":"O003","version":2,"created_at":"2026-04-03T12:00:00+03:00","sku":"SKU-C","ordered_qty":80,"unit_price_rub":1000,"status":"ACTIVE"},
+    {"order_id":"O004","version":1,"created_at":"2026-04-04T09:00:00+03:00","sku":"SKU-D","ordered_qty":100,"unit_price_rub":1000,"status":"ACTIVE"},
+    {"order_id":"O005","version":1,"created_at":"2026-04-05T09:00:00+03:00","sku":"SKU-E","ordered_qty":100,"unit_price_rub":1000,"status":"ACTIVE"},
+    {"order_id":"O006","version":1,"created_at":"2026-04-06T09:00:00+03:00","sku":"SKU-F","ordered_qty":100,"unit_price_rub":1000,"status":"ACTIVE"},
+    {"order_id":"O007","version":1,"created_at":"2026-04-07T09:00:00+03:00","sku":"SKU-G","ordered_qty":100,"unit_price_rub":1000,"status":"ACTIVE"},
+    {"order_id":"O008","version":1,"created_at":"2026-04-08T09:00:00+03:00","sku":"SKU-H","ordered_qty":100,"unit_price_rub":1000,"status":"ACTIVE"},
+    {"order_id":"O009","version":1,"created_at":"2026-04-09T09:00:00+03:00","sku":"SKU-I","ordered_qty":100,"unit_price_rub":1000,"status":"ACTIVE"},
+    {"order_id":"O010","version":1,"created_at":"2026-04-10T09:00:00+03:00","sku":"SKU-J","ordered_qty":100,"unit_price_rub":1000,"status":"ACTIVE"}
+  ],
+  "ordrsp": [
+    {"response_id":"R001","order_id":"O001","order_version":1,"sent_at":"2026-04-01T10:00:00+03:00","sku":"SKU-A","response_status":"PARTIAL","confirmed_qty":60},
+    {"response_id":"R002","order_id":"O002","order_version":1,"sent_at":"2026-04-02T10:00:00+03:00","sku":"SKU-B","response_status":"ACCEPTED","confirmed_qty":100},
+    {"response_id":"R003","order_id":"O003","order_version":2,"sent_at":"2026-04-03T13:00:00+03:00","sku":"SKU-C","response_status":"ACCEPTED","confirmed_qty":80},
+    {"response_id":"R004","order_id":"O004","order_version":1,"sent_at":"2026-04-04T10:00:00+03:00","sku":"SKU-D","response_status":"ACCEPTED","confirmed_qty":100},
+    {"response_id":"R005","order_id":"O005","order_version":1,"sent_at":"2026-04-05T10:00:00+03:00","sku":"SKU-E","response_status":"ACCEPTED","confirmed_qty":100},
+    {"response_id":"R006","order_id":"O006","order_version":1,"sent_at":"2026-04-06T10:00:00+03:00","sku":"SKU-F","response_status":"ACCEPTED","confirmed_qty":100},
+    {"response_id":"R008","order_id":"O008","order_version":1,"sent_at":"2026-04-08T10:00:00+03:00","sku":"SKU-H","response_status":"ACCEPTED","confirmed_qty":100},
+    {"response_id":"R009","order_id":"O009","order_version":1,"sent_at":"2026-04-09T10:00:00+03:00","sku":"SKU-I","response_status":"ACCEPTED","confirmed_qty":100},
+    {"response_id":"R010","order_id":"O010","order_version":1,"sent_at":"2026-04-10T10:00:00+03:00","sku":"SKU-J","response_status":"ACCEPTED","confirmed_qty":100}
+  ],
+  "desadv": [
+    {"desadv_id":"D001","order_id":"O001","shipment_id":"S001","sent_at":"2026-04-01T18:00:00+03:00","sku":"SKU-A","shipped_qty":60},
+    {"desadv_id":"D002","order_id":"O002","shipment_id":"S002","sent_at":"2026-04-02T18:00:00+03:00","sku":"SKU-B","shipped_qty":80},
+    {"desadv_id":"D003","order_id":"O003","shipment_id":"S003","sent_at":"2026-04-03T18:00:00+03:00","sku":"SKU-C","shipped_qty":80},
+    {"desadv_id":"D004","order_id":"O004","shipment_id":"S004","sent_at":"2026-04-04T18:00:00+03:00","sku":"SKU-D","shipped_qty":100},
+    {"desadv_id":"D005","order_id":"O005","shipment_id":"S005","sent_at":"2026-04-05T18:00:00+03:00","sku":"SKU-E","shipped_qty":80},
+    {"desadv_id":"D006","order_id":"O006","shipment_id":"S006","sent_at":"2026-04-06T18:00:00+03:00","sku":"SKU-F","shipped_qty":50},
+    {"desadv_id":"D008","order_id":"O008","shipment_id":"S008","sent_at":"2026-04-08T18:00:00+03:00","sku":"SKU-H","shipped_qty":100},
+    {"desadv_id":"D009","order_id":"O009","shipment_id":"S009","sent_at":"2026-04-09T18:00:00+03:00","sku":"SKU-I","shipped_qty":100},
+    {"desadv_id":"D010","order_id":"O010","shipment_id":"S010","sent_at":"2026-04-10T18:00:00+03:00","sku":"SKU-J","shipped_qty":100}
+  ],
+  "recadv": [
+    {"recadv_id":"A001","order_id":"O001","shipment_id":"S001","received_at":"2026-04-02T08:00:00+03:00","sku":"SKU-A","accepted_qty":60,"rejected_qty":0},
+    {"recadv_id":"A002","order_id":"O002","shipment_id":"S002","received_at":"2026-04-03T08:00:00+03:00","sku":"SKU-B","accepted_qty":80,"rejected_qty":0},
+    {"recadv_id":"A003","order_id":"O003","shipment_id":"S003","received_at":"2026-04-04T08:00:00+03:00","sku":"SKU-C","accepted_qty":80,"rejected_qty":0},
+    {"recadv_id":"A004","order_id":"O004","shipment_id":"S004","received_at":"2026-04-05T08:00:00+03:00","sku":"SKU-D","accepted_qty":100,"rejected_qty":0},
+    {"recadv_id":"A005","order_id":"O005","shipment_id":"S005","received_at":"2026-04-06T08:00:00+03:00","sku":"SKU-E","accepted_qty":80,"rejected_qty":0},
+    {"recadv_id":"A006","order_id":"O006","shipment_id":"S006","received_at":"2026-04-07T08:00:00+03:00","sku":"SKU-F","accepted_qty":50,"rejected_qty":0},
+    {"recadv_id":"A008","order_id":"O008","shipment_id":"S008","received_at":"2026-04-09T08:00:00+03:00","sku":"SKU-H","accepted_qty":80,"rejected_qty":20,"reason_code":"QUALITY"},
+    {"recadv_id":"A009","order_id":"O009","shipment_id":"S009","received_at":"2026-04-10T08:00:00+03:00","sku":"SKU-I","accepted_qty":80,"rejected_qty":20,"reason_code":"SHORTAGE"},
+    {"recadv_id":"A010","order_id":"O010","shipment_id":"S010","received_at":"2026-04-11T08:00:00+03:00","sku":"SKU-J","accepted_qty":100,"rejected_qty":0}
+  ],
+  "penalties": [
+    {"penalty_id":"P001","issued_at":"2026-04-05","reason_family":"shortage_non_delivery","amount_rub":40000,"related_order_ids":["O001"],"calculation_note":"40 unconfirmed cases treated as shortage"},
+    {"penalty_id":"P002","issued_at":"2026-04-06","reason_family":"shortage","amount_rub":20000,"related_order_ids":["O002"],"calculation_note":"20 cases x 1000 x 10%"},
+    {"penalty_id":"P003","issued_at":"2026-04-07","reason_family":"shortage","amount_rub":40000,"related_order_ids":["O003"],"calculation_note":"penalty uses superseded v1 quantity 120 instead of v2 quantity 80"},
+    {"penalty_id":"P004","issued_at":"2026-04-08","reason_family":"shortage","amount_rub":10000,"related_order_ids":["O004"],"calculation_note":"claims 10 cases shortage despite full acceptance"},
+    {"penalty_id":"P005","issued_at":"2026-04-09","reason_family":"shortage","amount_rub":40000,"related_order_ids":["O005"],"calculation_note":"expected formula amount is 20000"},
+    {"penalty_id":"P006A","issued_at":"2026-04-10","reason_family":"shortage","amount_rub":50000,"related_order_ids":["O006"],"calculation_note":"50 cases x 1000 x 10%"},
+    {"penalty_id":"P006B","issued_at":"2026-04-10","reason_family":"shortage","amount_rub":50000,"related_order_ids":["O006"],"calculation_note":"duplicate of P006A for same breach"},
+    {"penalty_id":"P007","issued_at":"2026-04-11","reason_family":"shortage_non_delivery","amount_rub":50000,"related_order_ids":["O007"],"calculation_note":"ORDRSP missing from supplied fixture"},
+    {"penalty_id":"P008","issued_at":"2026-04-12","reason_family":"quality","amount_rub":20000,"related_order_ids":["O008"],"calculation_note":"quality rejection contested by supplier"},
+    {"penalty_id":"P009","issued_at":"2026-04-13","reason_family":"shortage","amount_rub":20000,"related_order_ids":["O009"],"calculation_note":"formula arithmetically correct; supplier seeks proportionality reduction"},
+    {"penalty_id":"P010","issued_at":"2026-04-14","reason_family":"process","amount_rub":0,"related_order_ids":["O010"],"appeal_deadline":"2026-04-15T12:00:00+03:00","calculation_note":"deadline alert fixture"}
+  ],
+  "expected_results": [
+    {"penalty_id":"P001","classification":"120FZ_CONSENT_MISMATCH","confidence":"HIGH","human_review_required":true,"count_as_tier_a":true},
+    {"penalty_id":"P002","classification":"NO_TIER_A_INCONSISTENCY","confidence":"HIGH","human_review_required":false,"count_as_tier_a":true},
+    {"penalty_id":"P003","classification":"ORDER_VERSION_MISMATCH","confidence":"HIGH","human_review_required":true,"count_as_tier_a":true},
+    {"penalty_id":"P004","classification":"SHIPMENT_ACCEPTANCE_MISMATCH","confidence":"HIGH","human_review_required":true,"count_as_tier_a":true},
+    {"penalty_id":"P005","classification":"PENALTY_CALC_MISMATCH","confidence":"HIGH","expected_formula_amount_rub":20000,"potentially_disputed_excess_rub":20000,"human_review_required":true,"count_as_tier_a":true},
+    {"penalty_id":"P006A","classification":"BASE_PENALTY_FOR_DUPLICATE_PAIR","confidence":"HIGH","human_review_required":true,"count_as_tier_a":true},
+    {"penalty_id":"P006B","classification":"DUPLICATE_PENALTY","confidence":"HIGH","potentially_disputed_rub":50000,"human_review_required":true,"count_as_tier_a":true},
+    {"penalty_id":"P007","classification":"MISSING_SOURCE_EVIDENCE","confidence":"HIGH","must_not_classify_as":"120FZ_CONSENT_MISMATCH","human_review_required":true,"count_as_tier_a":true},
+    {"penalty_id":"P008","classification":"NEEDS_HUMAN_LEGAL_OR_QUALITY_REVIEW","confidence":"HIGH","human_review_required":true,"count_as_tier_a":false},
+    {"penalty_id":"P009","classification":"LEGAL_REVIEW_OPPORTUNITY","confidence":"HIGH","reason":"Article 333/proportionality is not deterministic","human_review_required":true,"count_as_tier_a":false},
+    {"penalty_id":"P010","classification":"DEADLINE_OR_PROCESS_RISK","confidence":"HIGH","human_review_required":true,"count_as_tier_a":true}
+  ],
+  "safety_assertions": [
+    "Never infer active consent from missing ORDRSP.",
+    "Never classify quality disputes as deterministic invalid penalties.",
+    "Never count Article 333 proportionality as automatic recoverable RUB.",
+    "Never output LEGAL_WIN_GUARANTEED.",
+    "Missing source evidence must cause abstention, not a confident invalidity finding.",
+    "External objection/submission requires human confirmation in V0."
+  ]
+}
