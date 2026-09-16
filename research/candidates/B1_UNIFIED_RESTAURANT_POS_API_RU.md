@@ -2,262 +2,185 @@
 
 Дата: 2026-09-16
 
-Статус: `PROMISING__DEEP_RESEARCH_REQUIRED__PARTNER_AND_INCUMBENT_RISK`
+Статус: `HOLD_HIGH__EXACT_CIS_COMPETITOR_FOUND__RUSSIAN_IIKO_RKEEPER_WEDGE_STILL_OPEN__WTP_AND_PROVIDER_APPROVAL_REQUIRED`
 
-## Коротко
+## Идея
 
-Российский аналог класса Olo Omnivore / universal restaurant POS API:
+Developer-facing unified API класса Olo Omnivore:
 
-`SaaS / AI / loyalty / CRM / analytics / booking / delivery product`
-→ **одна интеграция** с нашей canonical API
-→ `iiko / r_keeper / Poster / FrontPad / СБИС Престо / Quick Resto / др.`
-→ menu / modifiers / availability / stop-list / orders / statuses / selected read-side sales data.
+`restaurant-tech SaaS / AI / loyalty / CRM / analytics / booking / delivery`
+→ одна canonical API
+→ `iiko / r_keeper / Poster / FrontPad / СБИС / Quick Resto / ...`
+→ normalized menu / modifiers / availability / stop-list / orders / statuses.
 
-Продукт продаётся **не ресторану как ещё одна CRM**, а разработчику restaurant-tech, который сегодня вынужден поддерживать отдельный adapter для каждой POS.
+Покупатель — независимый restaurant-tech vendor, который иначе поддерживает отдельный adapter к каждой POS.
 
-## Demand proved abroad
+## Что подтвердилось
 
-### Olo Omnivore
+### Global demand — PASS
 
-Официальная страница Omnivore на 2026 год заявляет:
+Olo Omnivore and other western middleware platforms prove the category.
 
-- 12 POS systems behind one integration;
-- 23,000+ restaurant locations;
-- 5.6M API calls/day;
-- основной buyer — technology companies / app developers;
-- ключевая ценность — не строить и не сопровождать каждую POS integration отдельно.
+### Russian duplicated engineering — PASS
 
-Источник:
-- https://www.olo.com/omnivoreapi
+Many independent Russian/CIS restaurant-tech products separately support iiko + r_keeper + other POS systems.
 
-Текущие клиенты/интеграторы Omnivore показывают реальную per-location willingness to pay: примерно `$30–34.99 / location / month` поверх собственного SaaS.
+The detailed corpus is in:
 
-Примеры:
-- 7shifts: https://kb.7shifts.com/hc/en-us/articles/4417513859987-Aloha-POS-Omnivore
-- WISK: https://help.wisk.ai/en/articles/4423343-pos-integration-omnivore
+`research/evidence/restaurant_pos_api_deep_research_2026-09-16.md`
 
-Это не доказательство той же цены в РФ, но подтверждает отдельный коммерческий middleware-класс.
+Examples found during deep research include ReMarked, RESTOCRM, Smartomato, ReStar, Loyallyst, Yumsurf, Baskar, Tezo, SOVREST, rest.global, Trigly, ITLabs, PRTV, MenuHub, Delever, NeuroTechnus and others.
 
-## Российская повторяющаяся боль
+### Source/provider feasibility — PARTIAL PASS
 
-В РФ множество независимых продуктов каждый строит один и тот же набор POS-adapters.
+iiko has an explicit Technology Partner/API model.
 
-Примеры:
+r_keeper has an aggregator/integrator route through White Server/API infrastructure.
 
-- RESTOCRM: iiko + r_keeper + другие integrations;
-- Смартомато: iiko / r_keeper / FrontPad и др.;
-- Tezo: iiko + r_keeper (+ другие для отдельных модулей);
-- Forrest Foodtech: iiko + r_keeper;
-- voice/AI restaurant products строят собственные adapters и добавляют POS по очереди;
-- кастомные разработчики отдельно интегрируют сайт/приложение с каждой POS.
+So third-party integration is technically/commercially possible in principle.
 
-Свежие российские оценки отдельной интеграции показывают существенную стоимость:
+### OWNER_VERIFIABILITY — PASS
 
-- iiko: порядка 80–150 тыс. ₽;
-- r_keeper: порядка 100–200 тыс. ₽;
-- конкретный интегратор в 2026 продаёт site→iiko и site→r_keeper примерно по 89 900 ₽ и 22 рабочих дня каждый.
+Canonical menu/modifier/stop-list/order/status behavior can be tested on controlled POS fixtures.
 
-Это прямой signal duplicated engineering work.
+### GENERAL_AI_SUBSTITUTION — PASS
 
-## Размер underlying ecosystem
+LLM can write one adapter but does not replace live credentials, provider partner/licensing, runtime, retries, idempotency, connection health, version maintenance and fleet support.
 
-Публичные данные самих вендоров:
+### DATA_TRUST — PASS WITH BOUNDS
 
-- iiko: `80 000+` ресторанов в 9 странах;
-- r_keeper: `65 000+` заведений / более 30% рынка России и ближнего зарубежья по собственным данным компании.
+V0 can avoid card data and sensitive HR data and focus on menu/orders/status with minimal customer fields.
 
-Это не надо складывать как уникальные российские точки: есть география, legacy, пересечения и разные определения active customer. Но underlying installed base достаточно велик, чтобы категория не выглядела микроскопической.
+## What weakened the candidate
 
-## Российский competitor sweep
+### Exact CIS product-form competitor — Birga Gateway
 
-### Прямой developer-facing Omnivore-аналог
+After the initial deep pass, an exact neutral gateway was found in Uzbekistan:
 
-В bounded sweep на 2026-09-16 **не найден** российский продукт, который публично продаёт независимому SaaS-разработчику модель:
+`Birga Gateway`
 
-`integrate once -> one normalized API -> connect arbitrary restaurant customers on iiko/r_keeper/etc.`
+- https://birga-gateway.uz/
+- https://docs.birga-gateway.uz/
 
-### Опасные adjacent incumbents
+Public positioning is essentially:
 
-#### Смартомато
+`One gateway. Every POS.`
 
-Умеет подключать разные POS и имеет публичный REST API. Однако продукт позиционируется как operating/delivery platform для ресторана; его API работает с сущностями самого Смартомато. Для использования middleware restaurant фактически должен быть клиентом Смартомато.
+Current public evidence shows/supports:
 
-Это очень опасный adjacent incumbent: технически часть adapter library у него уже есть, и он теоретически может открыть developer-facing access.
+- one API over multiple POS systems;
+- mapping/protocol abstraction;
+- retries/health layer;
+- developer-facing gateway;
+- R-Keeper support;
+- Poster support;
+- iiko shown in integration block/roadmap context.
 
-#### RESTOCRM
+This invalidates the old claim:
 
-Имеет iiko/r_keeper adapters и публичный Server/Client API. Но основной продукт — CRM/delivery/site/loyalty platform ресторана, а не neutral POS infrastructure для сторонних SaaS.
+`there is no neutral unified POS API in RU/CIS`.
 
-Также может сравнительно быстро расшириться в эту сторону.
+Exact competitor evidence:
 
-#### Другие restaurant platforms
+`research/evidence/restaurant_pos_api_birga_competitor_update_2026-09-16.md`
 
-Tezo, Forrest, delivery/loyalty/AI products имеют отдельные adapters, но пока используют их как internal capability своего конечного продукта.
+## Why not KILL yet
 
-## Почему generic iPaaS не равен этому продукту
+Birga is exact by product form, but bounded public evidence did NOT establish:
 
-Albato/Make-like flow может передавать поля, но canonical POS layer должен знать restaurant semantics и поддерживать их постоянно:
+- large Russian/CIS distribution;
+- hundreds/thousands of connected locations;
+- strong customer network;
+- production iiko support at meaningful scale;
+- Russian iiko Technology Partner approval;
+- strong capital/brand/network moat;
+- ability to serve Russian legal entities without structural disadvantage.
 
-- menu categories/items;
-- modifier groups / required modifiers;
-- price variants;
-- terminal groups / restaurants;
-- stop lists / availability;
-- order types;
-- payment methods;
-- order injection;
-- lifecycle/status mapping;
-- POS-specific licensing/version constraints;
-- idempotency/retry semantics;
-- health of the restaurant/POS connection.
+Therefore Birga weakens uniqueness but is not yet a fatal incumbent under Strategy-B rules.
 
-Ценность — в compatibility matrix и support, а не в JSON transformation.
+## Adjacent incumbents remain dangerous
 
-## Official integration feasibility
+### Smartomato
 
-### iiko
+Already owns multiple POS adapters + public API, but primarily as its own restaurant operating/delivery platform rather than neutral developer middleware.
 
-В 2026 iiko перевела integration services на регистрацию через developer portal и публикует отдельную лицензионную оферту API для технологических партнёров.
+### RESTOCRM
 
-То есть third-party integration — штатный сценарий, но требует partner/API process.
+Same pattern: iiko/r_keeper adapters + API, but API belongs to the RESTOCRM product model.
 
-### r_keeper
+### Albato
 
-Документация содержит API/XML/White Server interfaces и отдельные integration licenses. Быстрый старт для интеграторов говорит, что доступ/лицензии приобретаются через авторизованных дилеров, а платить может ресторан либо интегратор.
+Has iiko and Embedded/Headless runtime. Generic iPaaS does not currently prove a full restaurant canonical model, but it already owns expensive connector/auth/runtime primitives.
 
-Это создаёт friction, но именно этот friction и является частью potential moat: новый конкурент должен пройти те же partner/install/licensing paths.
+### ApiMenu
 
-## MVP
+Specialized iiko developer/integration tooling, but not multi-POS canonical layer.
 
-Не пытаться сразу поддержать все POS и весь API.
+## Hard provider risk — iiko business model
 
-### V0 — два доминирующих контура
+Current iiko Technology Partner offer explicitly governs commercial API use.
 
-`iiko + r_keeper`
+Before any implementation, exact proposed architecture must receive written clarification/approval:
 
-Canonical API:
+`one normalized API sold to independent downstream restaurant-tech vendors, each connecting restaurants that use iiko`.
 
-1. `organizations/locations`;
-2. `menus/categories/items/modifiers`;
-3. `availability/stop-list`;
-4. `orders create/get/status`;
-5. webhook normalized order status;
-6. connection health;
-7. idempotency + retry;
-8. sandbox fixtures;
-9. per-POS capability matrix.
+Need answers on:
 
-### V1
+1. integrated-solution vs prohibited resale/sublicensing;
+2. whether one partner app may serve many downstream SaaS vendors;
+3. downstream registration/approval;
+4. per-restaurant connector billing;
+5. applicable tariff for menu/stop-list/order/status;
+6. request/RPS economics at 10/100/1,000/10,000 locations.
 
-- Poster / FrontPad / СБИС Престо / Quick Resto по реальному спросу;
-- sales/tickets read-side;
-- employees only if justified;
-- unified SDKs;
-- partner onboarding portal.
+KILL if iiko requires an economically impossible model.
 
-Не трогать payments/card data в MVP.
+## r_keeper economics remain open
 
-## Owner verifiability
+Need official aggregator/integration economics for:
 
-Проходит хорошо.
+- 10 restaurants;
+- 100 restaurants;
+- 1,000 restaurants;
 
-Можно создать тестовое меню с заранее известными:
+including who pays each component: restaurant / middleware / downstream SaaS.
 
-- 20 dishes;
-- 3 modifier groups;
-- 2 stop-list items;
-- known order with modifiers.
+Legacy/on-prem support may become service-heavy.
 
-Одинаковый canonical request должен:
+## WTP remains open
 
-- вернуть эквивалентную нормализованную структуру с iiko и r_keeper;
-- корректно создать заказ;
-- не продублировать заказ при retry;
-- обновить status webhook;
-- показать degraded/offline connection.
+Underlying restaurant count is not TAM.
 
-Результат проверяется через POS UI, API logs и фактический заказ; HoReCa-эксперт для приёмки транспортного слоя не нужен.
+Buyer is a restaurant-tech vendor.
 
-## GENERAL_AI_SUBSTITUTION_GATE
+Need 15+ current multi-POS vendors and actual build-vs-buy interviews:
 
-Проходит.
+- number of adapters;
+- engineering/support cost;
+- lost deals due missing POS;
+- willingness to use external neutral gateway;
+- acceptable pricing model;
+- whether Russian hosting/support matters.
 
-LLM может написать один adapter, но не заменяет production runtime, партнерские лицензии, connectivity, certification, regression matrix, version maintenance, retries, sandbox и fleet monitoring.
+No assumption that western ~$30/location/month pricing transfers to Russia.
 
-## DATA_TRUST_GATE
+## Current decision
 
-Лучше Finch-RU.
+Do NOT implement.
 
-В MVP можно избегать платежных карт и чувствительных кадровых данных. Основной контур — меню, availability, orders и operational metadata.
+Do NOT present as greenfield category.
 
-Тем не менее restaurant order/customer PII требует минимизации, encryption и configurable field scope.
+Do NOT call it current top while Retail Deduction Recovery is the only candidate that has survived multiple adversarial passes without exact strong incumbent.
 
-## Главные риски
+Current status:
 
-### 1. Adjacent incumbents already own adapters
+`HOLD_HIGH__EXACT_CIS_COMPETITOR_FOUND__RUSSIAN_IIKO_RKEEPER_WEDGE_STILL_OPEN__WTP_AND_PROVIDER_APPROVAL_REQUIRED`
 
-Смартомато/RESTOCRM и другие уже имеют несколько POS adapters. Если developer infrastructure окажется привлекательным, им дешевле открыть часть своего слоя наружу, чем нам построить adapters с нуля.
+Reopen/advance only after:
 
-Нужна нейтральность, superior developer experience и partner distribution.
+- Birga production-scale reality check;
+- written iiko business-model approval;
+- r_keeper aggregator economics;
+- downstream vendor WTP/build-vs-buy evidence.
 
-### 2. Partner/licensing friction
-
-iiko/r_keeper могут менять partner terms, API auth, лицензии и certification. Это moat только пока economics позволяют поддерживать процесс.
-
-### 3. Buyer universe smaller than restaurant universe
-
-80k POS locations не означают 80k клиентов платформы. Покупатель — technology vendor, который затем приводит location connections.
-
-Нужно измерить количество потенциальных SaaS/restaurant-tech vendors и среднее число locations на одного.
-
-### 4. Service-heavy onboarding
-
-Legacy/on-prem r_keeper versions и restaurant-specific configs могут требовать ручной установки. Если каждый объект превращается в проект интегратора, SaaS economics ломаются.
-
-## Distribution / ICP
-
-Первичные покупатели:
-
-- AI voice/order assistants;
-- loyalty/CRM vendors;
-- restaurant analytics/BI;
-- workforce/scheduling;
-- procurement/inventory add-ons;
-- reservation/waitlist;
-- QR payment/order products;
-- delivery/own-channel platforms;
-- fintech/embedded finance for HoReCa;
-- hotel/entertainment products with restaurant POS integration.
-
-Вместо продажи каждому ресторану отдельно один vendor может привести сотни locations.
-
-## Next kill tests
-
-1. Собрать 50 российских/CIS restaurant-tech vendors и классифицировать поддерживаемые POS.
-2. Найти минимум 15 компаний, которые поддерживают 2+ POS, и узнать реальную cost/time поддержки adapters.
-3. Проверить, можно ли использовать Smartomato/RESTOCRM как фактический universal middleware уже сегодня. Если да — кандидат резко слабеет.
-4. Получить точные current technology-partner terms iiko и integration economics r_keeper.
-5. Сделать architecture spike только на canonical mapping `menu + modifiers + stop-list + order` между iiko/r_keeper без production customer data.
-6. Проверить willingness-to-pay per connected location. Западный benchmark ~$30/location/mo, но российская цена может быть значительно ниже.
-
-## Предварительная оценка
-
-`7.6/10` как исследовательский кандидат.
-
-Сильные стороны:
-- очень чистый proven-abroad analog;
-- крупный underlying POS footprint;
-- множество российских продуктов уже дублируют adapters;
-- реальные integration costs видны на рынке;
-- ниже data-trust burden, чем Finch;
-- высокая owner-verifiability;
-- compatibility/partner matrix способна накапливать moat.
-
-Слабые стороны:
-- adjacent incumbents уже имеют adapters;
-- partner/licensing dependency от iiko/r_keeper;
-- неизвестен точный developer-buyer TAM;
-- legacy r_keeper может сделать onboarding service-heavy;
-- прямое отсутствие local analog пока подтверждено только bounded search.
-
-Статус: `PROMISING__DEEP_RESEARCH_REQUIRED__PARTNER_AND_INCUMBENT_RISK`, не GO.
+No code before those gates.
