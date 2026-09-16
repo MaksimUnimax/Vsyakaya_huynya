@@ -2,290 +2,127 @@
 
 Дата: 2026-09-16.
 
-Статус: `PROMISING__DEEP_RESEARCH_REQUIRED__NATIVE_PLATFORM_AND_TRUST_RISK`.
+Статус: `KILL__YANDEX_ONLY__NATIVE_AND_ADJACENT_INCUMBENTS_TOO_CLOSE`
 
-## Коротко
+## Итог
 
-Не универсальный «кибербезопасность-AI» и не очередной SIEM.
+Первоначальная гипотеза была технически жизнеспособной, но **закрыта как самостоятельный Yandex-only продукт после более глубокого incumbent sweep**.
 
-Первый узкий продукт:
+Идея:
 
-`партнёр / MSP подключает организации Яндекс 360 -> продукт регулярно проверяет конфигурацию по официальному стандарту Y360-* -> хранит историю drift -> показывает PASS/FAIL + raw evidence + инструкцию -> формирует отчёт клиенту -> при необходимости безопасно помогает исправить настройку`.
+`партнёр/MSP подключает клиентские организации Яндекс 360 -> сервис регулярно проверяет официальный baseline Y360-* -> хранит drift/evidence -> алертит -> формирует отчёт -> помогает исправлять нарушения`.
 
-Ключевой initial buyer — не обязательно конечный SMB. Сильнейший distribution wedge — авторизованный партнёр Яндекс 360, который уже оказывает десяткам клиентов платные услуги внедрения, администрирования, миграции и техподдержки.
+Западная механика доказана SSPM/MSP-продуктами уровня AppOmni, Microsoft 365 Lighthouse и Augmentt. Российский рынок Яндекс 360 также достаточно велик. Причина KILL — не отсутствие боли и не техническая невозможность.
 
-## Почему это не выдуманный security score
+Причина KILL: **сильные существующие игроки уже имеют почти весь технологический и дистрибуционный фундамент и могут добавить exact posture/baseline слой быстрее, чем новый игрок успеет создать moat**.
 
-18 июня 2026 Yandex Cloud опубликовал стандарт «по защите и безопасному использованию Яндекс 360», версия 1.0.0:
+## Что технически подтвердилось
+
+Официальный стандарт Яндекс 360 версии 1.0.0 от 18.06.2026 содержит 14 контролей `Y360-1...Y360-14` и прямо допускает автоматизацию аудита через API:
 
 https://yandex.cloud/ru/docs/security/standard-360/all
 
-Яндекс прямо пишет, что аудит выполнения рекомендаций можно автоматизировать скриптами через API Яндекс 360.
+Большая часть полезных проверок может работать read-only. Подробная матрица scopes/checks сохранена отдельно:
 
-В текущем стандарте 14 именованных контролей:
+`research/evidence/y360_sspm_scope_and_platform_kill_test_2026-09-16.md`
 
-- Y360-1 — минимальное количество администраторов;
-- Y360-2 — ограничено время жизни cookie-сессии;
-- Y360-3 — 2FA;
-- Y360-4 — secure phone у доменных пользователей;
-- Y360-5 — блокировка неактивных пользователей;
-- Y360-6 — парольная политика;
-- Y360-7 — отсутствие портальных @yandex.ru аккаунтов;
-- Y360-8 — использование SSO;
-- Y360-9 — восстановление аккаунта владельца;
-- Y360-10 — ревизия OAuth-токенов/scopes;
-- Y360-11 — мониторинг аудит-лога;
-- Y360-12 — запрет аутентификации во внешних OAuth-сервисах;
-- Y360-13 — запрет/allowlist сервисных приложений;
-- Y360-14 — подключение существующей DLP к Яндекс 360.
+То есть технический kill gate **не** сработал.
 
-У 12 из 14 контролей стандарт содержит явную API-проверку полностью или для основной части контроля. Y360-8 и Y360-11 в текущем тексте в большей степени описаны через конфигурацию/UI. Это означает, что полезный V0 можно построить без собственного «экспертного AI-решения»: rule -> официальный Y360 control -> API field -> PASS/FAIL.
+## Почему всё равно KILL
 
-Примеры:
+### 1. Яндекс уже владеет native partner surface
 
-- Y360-1: `UserService_List`, `isAdmin`;
-- Y360-3: `Domain2FAService_Get`, `UserService_Get2fa`;
-- Y360-6: `DomainPasswordsService_Get`, `enabled=true`, `changeFrequency<=180`;
-- Y360-2: `DomainSessionsService_Get`, `authTTL`;
-- Y360-5: audit log / `occurred_at`;
-- Y360-7: `UserService_List`, email must not end with `@yandex.ru`;
-- Y360-10 / Y360-13: `ServiceApplicationsService_Get`, applications + scopes;
-- Y360-12: `OauthAccessRestrictionsService_Get`, `restricted=true`;
-- Y360-14: `RoutingService_GetRules`.
+Partner Portal Yandex Cloud/Яндекс 360 уже управляет:
 
-## Market size — not micro-SaaS
+- customer accounts/subaccounts;
+- связанными организациями Яндекс 360;
+- тарифами и add-ons;
+- историей и коммерческим lifecycle;
+- публичным Partner Portal API (добавлен в Q1 2026).
 
-Official Yandex 2026 evidence:
+Release notes:
 
-https://www.yandex.ru/company/news/12-08-2026-01
-https://360.yandex.ru/blog/news/bolee-185-tis-organizatsii-yandeks-360-obyavlyaet-finansovie-rezultati-za-pervoe-polugodie/
+https://yandex.cloud/ru/docs/partner/release-notes/
 
-By H1 2026:
+Следовательно, `единая панель нескольких организаций Яндекс 360` не является gap.
 
-- >185,000 organizations use Yandex 360;
-- 8.9M paid accounts;
-- 2.4M paid accounts belong to large companies;
-- H1 revenue of Yandex 360 = 11.6B RUB, +42% YoY;
-- partner network = 390 partners;
-- partner-channel revenue +57% YoY.
+### 2. Яндекс уже строит security platform
 
-Yandex explicitly says partners earn not only resale commission but also consulting, administration, migration, technical support and other services:
+Yandex Security Deck уже включает CSPM, DSPM, KSPM, CIEM, Threat Detection и другие модули. DSPM в 2026 уже умеет работать с Яндекс Дисками 360.
 
-https://360.yandex.ru/business/partners-program/
+https://yandex.cloud/ru/docs/security-deck/
 
-This creates a plausible distribution model: sell a multi-tenant security/audit console to MSP/integration partners and let them package recurring security administration for existing customers.
+Яндекс имеет естественный доступ и к tenant surface, и к security product organization. Native Y360 posture — логичное расширение, которое внешний стартап не контролирует.
 
-## Western category is proven
+### 3. Найден слишком близкий российский adjacent incumbent — `+Альянс Поток`
 
-This is a localized narrow wedge into the mature SSPM category (SaaS Security Posture Management).
+`+Альянс` — технологический партнёр Яндекса и действующий вендор продуктов поверх Яндекс 360.
 
-Western products such as AppOmni / Palo Alto SSPM continuously connect to SaaS admin APIs, detect configuration drift, risky identities/OAuth integrations and compliance gaps, and support remediation.
+`+Альянс Поток` уже умеет:
 
-Examples:
+- OAuth-подключение организаций Яндекс 360;
+- event/schedule/webhook automation;
+- security alerts;
+- отчёты по доступам;
+- блокировку пользователей;
+- отзыв сессий/токенов;
+- изменение прав на файлы;
+- onboarding/offboarding;
+- историю и трассировку запусков;
+- сценарии из 1С;
+- подключение до 3 организаций на корпоративном тарифе.
 
-https://www.appomni.com/
-https://www.paloaltonetworks.com/sase/saas-security-posture-management
+Product page:
 
-AppOmni publicly states >100M SaaS user accounts protected. Public AWS Marketplace offers have listed pricing on the order of thousands of dollars/year for relatively small user/application blocks. Category willingness-to-pay is therefore materially stronger than micro-SaaS categories rejected earlier.
+https://plus-aliance.ru/solutions/automation/potok/
 
-## Russian direct competitor sweep — current result
+Security-alert workflow:
 
-A bounded search on 2026-09-16 did NOT find a Russian product publicly positioning itself as:
+https://plus-aliance.ru/news/pro-business/alerty-bezopasnosti-v-yandeks-360-kak-nastroit-kontrol-riskovykh-deystviy-v-alyans-potoke/
 
-`continuous posture / configuration audit for Yandex 360 against Y360-* controls + drift history + remediation + multi-tenant MSP console`.
+1C/offboarding workflow and current limits:
 
-Adjacent products exist and are important:
+https://plus-aliance.ru/news/tekhnoblog/prikaz-oformili-v-1s-uchetnaya-zapis-poyavilas-v-yandeks-360-svyazka-cherez-vkhodyashchiy-vebkhuk/
 
-- Kaspersky KUMA can ingest/normalize Yandex 360 audit events; this is SIEM/event analysis, not a current-configuration posture engine.
-- Solar Dozor can control information exchange through Yandex 360; this is DLP.
-- Yandex Security Deck is the most dangerous adjacent incumbent.
+Для такого игрока добавить периодический набор из 14 официальных Y360-checks + report — **feature extension**, а не новая платформа.
 
-Absence in search is not proof of absence. Major vendors and partner apps still require deeper demo/docs/API audit.
+Это повторяет главный урок R1/Parsing.agency: наличие пока не реализованной exact-фичи не создаёт moat, если сильный incumbent может быстро встроить её в существующий продукт и продать своей базе.
 
-## Native-platform risk — highest strategic risk
+## Почему cross-platform variant не считается найденным кандидатом
 
-Yandex itself is moving rapidly into security-posture products.
+Более широкая формулировка:
 
-Yandex Security Deck already includes:
+`Augmentt / Lighthouse для российских SaaS/workspace MSP: Yandex 360 + VK WorkSpace + другие платформы`
 
-- CSPM for Yandex Cloud infrastructure;
-- DSPM;
-- KSPM;
-- CIEM;
-- Threat Detection.
+может быть отдельной гипотезой, но **она пока не доказана**.
 
-In 2026 DSPM gained direct scanning of data stored on Yandex 360 Disks:
+Не подтверждено:
 
-https://yandex.cloud/ru/docs/security-deck/concepts/dspm
+- достаточное admin/security API покрытие VK WorkSpace и других платформ;
+- отсутствие прямых cross-platform российских конкурентов;
+- наличие единого buyer/distribution motion;
+- willingness-to-pay за cross-platform layer;
+- невозможность локальным IAM/SIEM/MSP incumbents добавить тот же слой.
 
-Security Deck starter pricing is currently from about 25,960 RUB/month for cloud-security bundles:
+Поэтому нельзя спасать убитый Yandex-only кандидат обещанием будущей мультиплатформенности.
 
-https://yandex.cloud/ru/services/security-deck
+## Сохранённые полезные выводы
 
-Therefore **a Yandex-only single-tenant posture dashboard is NOT defensible**. Yandex can add it natively.
+- официальный Y360 standard — отличный machine-verifiable source;
+- большинство baseline checks можно сделать read-mostly;
+- owner-verifiability была хорошей: raw API evidence ↔ официальный control;
+- российские MSP действительно могут монетизировать recurring SaaS security operations — западный Augmentt подтверждает business model;
+- но distribution/moat важнее technical novelty.
 
-The surviving wedge must be stronger:
+## Reopen condition
 
-1. multi-tenant MSP view across many client organizations;
-2. independent historical drift/evidence;
-3. white-label reports and recurring service workflow;
-4. later cross-platform coverage (VK WorkSpace and possibly other Russian SaaS);
-5. lower-complexity/lower-price offer for customers for whom full Security Deck/CNAPP is excessive;
-6. optionally local/on-prem agent or minimized read-only permissions.
+Не возвращаться к Yandex-only SSPM без нового факта, который прямо меняет конкурентную картину.
 
-If these wedges do not create willingness to pay beyond a quarterly script, candidate becomes KILL.
+Допустимый новый факт, например:
 
-## VK WorkSpace expansion evidence
+- независимый cross-platform adapter layer уже доказан минимум для 2–3 крупных российских SaaS;
+- найден buyer, который платит именно за vendor-neutral multi-tenant posture, а не за Yandex automation;
+- появляется технический/network moat, недоступный Partner Portal / Security Deck / +Альянс;
+- incumbents явно отказываются от этого направления.
 
-VK WorkSpace already has useful posture surfaces:
-
-- organization/user 2FA;
-- user status and security fields;
-- SSO;
-- audit logs, including administrator actions;
-- API availability on business/enterprise tiers.
-
-Sources:
-
-https://biz.mail.ru/docs/saas/settings/2fa
-https://biz.mail.ru/docs/saas/settings/accounts/users
-https://www.workspacevk.com/blog/vk-workspace-saas-update-q2-2026/
-
-However current bounded research has NOT yet proved an admin API as rich as Yandex 360 for a full automated SSPM implementation. Do not promise VK support until API feasibility is confirmed.
-
-## V0
-
-No AI required.
-
-1. Connect one Yandex 360 organization.
-2. Fetch read-only configuration/evidence with minimum permissions possible.
-3. Evaluate official Y360-* controls.
-4. Show for every result:
-   - control ID;
-   - expected value;
-   - actual value / evidence;
-   - PASS / FAIL / MANUAL / NOT_APPLICABLE;
-   - official Yandex source;
-   - exact remediation instruction.
-5. Store snapshots and show configuration drift.
-6. Email/Telegram alert on newly failing control.
-7. Generate PDF/HTML evidence report.
-8. MSP account can switch between client organizations and see aggregate posture/drift.
-
-Do NOT start with auto-remediation. Write access materially increases trust and blast-radius risk. First product should be read-only where technically possible.
-
-## OWNER_VERIFIABILITY_GATE
-
-Passes unusually well for a security product because acceptance is deterministic.
-
-Example:
-
-- official Y360-6 says `enabled=true` and `changeFrequency<=180`;
-- test organization intentionally has `enabled=false`;
-- product must show FAIL with raw returned value;
-- setting is corrected;
-- next scan must show PASS.
-
-The user does not need to trust an AI security opinion. Correctness can be checked against official Yandex documentation and reproducible API responses.
-
-## GENERAL_AI_SUBSTITUTION_GATE
-
-Passes.
-
-LLM can explain a configuration snapshot but cannot replace authenticated continuous scans, drift history, multi-tenant partner administration, alerts and evidence generation.
-
-## DATA_TRUST_GATE
-
-Mixed / important risk.
-
-Admin APIs and security scopes are sensitive. Product should minimize permissions, separate tenants, encrypt secrets, maintain strong audit logs and support short-lived/rotatable credentials. A local agent/private deployment option may be necessary for larger customers.
-
-Important API caveat: some Yandex security GET operations currently use scopes whose names include `write`. This must be audited method-by-method before claiming true read-only onboarding.
-
-## Distribution hypothesis
-
-Primary ICP to test first:
-
-- Yandex 360 authorized partners/MSPs;
-- IT outsourcers administering many small/medium organizations;
-- security-oriented integrators serving Yandex 360 customers.
-
-Reason: one sale can expose the product to many tenants, partner already has customer trust, and Yandex officially encourages partners to sell administration/support services.
-
-Secondary ICP:
-
-- mid-market organizations with no dedicated security engineer but meaningful Yandex 360 footprint.
-
-## Next kill tests
-
-### 1. Exact automatable-control matrix
-
-For all 14 Y360 controls classify:
-
-- full read-only API check;
-- partial API check;
-- manual only;
-- plan/tariff limitations;
-- required scopes;
-- remediation API available or not.
-
-KILL or narrow drastically if too few high-value checks can be read safely.
-
-### 2. Direct competitor audit
-
-Explicitly audit current offerings/docs of:
-
-- Security Vision;
-- Kaspersky;
-- Solar;
-- BI.ZONE;
-- Garda;
-- UDV;
-- InfoWatch/SearchInform where relevant;
-- Yandex 360 partner marketplace/catalog.
-
-Need distinguish SIEM/DLP/CASB/CSPM from actual Yandex-360 configuration posture.
-
-### 3. Native Yandex roadmap risk
-
-Check Security Deck/Yandex 360 release notes continuously enough to see whether Y360-* posture dashboard is already planned/previewed.
-
-If Yandex releases native cross-organization continuous posture with partner/MSP view, KILL or pivot cross-platform.
-
-### 4. Partner willingness-to-pay
-
-Interview 10–15 Yandex 360 partners:
-
-- how many tenants they administer;
-- whether they currently check 2FA/OAuth/admins/session TTL manually;
-- whether customers pay recurring administration/security fee;
-- whether an automated white-label report helps sell/retain that service;
-- acceptable price per tenant / partner account.
-
-### 5. Quarterly-script substitution
-
-Strong kill gate.
-
-If partners say a free quarterly script against the 14 controls is enough and they do not need drift/history/reporting/multi-tenancy, do not build SaaS.
-
-## Preliminary assessment
-
-`8/10` as a research candidate, NOT GO.
-
-Stronger than many recent candidates because:
-
-- official machine-verifiable control source exists;
-- market is large and growing;
-- partner distribution already exists;
-- output is independently verifiable;
-- continuous workflow cannot be replaced by generic AI;
-- Western SSPM category has real enterprise willingness-to-pay.
-
-Main weaknesses:
-
-- Yandex itself is the strongest possible incumbent;
-- sensitive admin/security access creates trust barrier;
-- a 14-control script may be sufficient for many customers;
-- cross-platform moat is not yet proven.
-
-Do not implement before competitor + scope + partner willingness-to-pay kill tests.
+До этого: `KILL__YANDEX_ONLY__NATIVE_AND_ADJACENT_INCUMBENTS_TOO_CLOSE`.
