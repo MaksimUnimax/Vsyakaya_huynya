@@ -1,261 +1,210 @@
 # B1 — Customer Reference Operations for Russian B2B
 
-Дата: 2026-09-16
+Дата закрытия: 2026-09-16
 
-Статус: `PROMISING__DEEP_RESEARCH_REQUIRED__BITRIX_SUBSTITUTION_AND_TAM_TO_VALIDATE`
+Статус: `KILL__CORE_WORKFLOW_ALREADY_NATIVE_OR_LOW_CODE_IN_RUSSIAN_B2B_CRM`
 
-## Коротко
+## Идея
 
-Российский customer reference management / reference operations layer для B2B-вендоров, интеграторов и сервисных компаний с длинным enterprise sales cycle:
+Российский customer reference management / reference operations layer:
 
-`референсные клиенты -> разрешённые темы/отрасли/продукты -> availability/cooldown -> запрос от sales -> approval account owner/CS -> reference call/visit/case/tender list -> outcome -> влияние на сделку`.
+`референсные клиенты -> permissions/consent -> industry/product/use-case matching -> request from sales/tender -> owner approval -> cooldown/usage -> call/visit/case/tender reference list -> outcome -> opportunity influence`.
 
-Не referral program для привлечения новых лидов и не обычные отзывы.
+Это не referral program и не обычные отзывы.
 
-Ключевой объект — существующий клиент, которого продавец может использовать как доказательство опыта для конкретного prospect/тендера, не перегружая одних и тех же лучших клиентов.
+## Что подтвердилось — боль реальна
 
-## Demand proved abroad
+### Референс-визиты реально используются в российских B2B/enterprise продажах
 
-Customer Reference Management — отдельная зрелая B2B software category.
+Публичные примеры:
 
-### ReferenceEdge / Point of Reference
-
-ReferenceEdge существует как purpose-built Salesforce-native reference-management system и решает:
-
-- centralized advocate/reference registry;
-- поиск подходящего референса;
-- automated reference requests/approvals;
-- reference usage tracking;
-- защита от overuse/burnout;
-- rewards/engagement;
-- reports and dashboards;
-- связь reference activity с opportunity/revenue.
-
-Текущий сторонний pricing signal: около $999/month starting price (Software Advice/Capterra; vendor pricing зависит от user volume/contract).
-
-Источники:
-
-- https://www.point-of-reference.com/
-- https://www.point-of-reference.com/faq
-- https://www.softwareadvice.com/customer-reference-management/referenceedge-profile/
-
-### Influitive
-
-Более широкий customer-advocacy product; текущий Capterra pricing signal — около $1,499/month usage-based.
-
-- https://www.influitive.com/
-- https://www.capterra.com/p/136258/AdvocateHub/
-
-### Category breadth
-
-Software Advice в сентябре 2026 показывает отдельную категорию Customer Reference Management; customer advocacy category содержит десятки продуктов.
-
-Это не одинокая startup-гипотеза.
-
-## Российский процесс существует
-
-### 1. Референс-визиты и live references используются в enterprise IT
-
-Примеры:
-
-- 1С-Рарус прямо предлагает `Организовать референс-визит` корпоративным клиентам;
-- Docsvision / Московская Биржа / Контур проводили референс-визит для 30+ руководителей и ИТ-директоров;
-- VK WorkSpace enterprise sales использовал reference visit к крупной on-prem installation;
-- российские интеграторы публично обещают по запросу дать референс предыдущего клиента из нужной отрасли.
+- 1С-Рарус прямо предлагает корпоративным заказчикам организовать референс-визит и отдельно предлагает визиты к клиентам, где внедрены 1С:ERP/1С:ЗУП;
+- TopLog WMS организует потенциальным заказчикам референс-визит на склад со схожей отраслевой спецификой;
+- HFLabs предлагает референс-визит к своему клиенту, чтобы prospect мог получить обратную связь из первых уст;
+- АТП продаёт автоматизированные тендерные платформы и прямо предлагает `Заказать референс-визит`;
+- российские интеграторы и поставщики оборудования публикуют референс-листы и дают контакты клиентов для обратной связи.
 
 Источники:
 
 - https://rarus.ru/1c-corp/
-- https://rutube.ru/video/aba4d152acd3f12b10ef9d35f280d327/
-- https://sellus.pro/o-kompanii/
+- https://rarus.ru/erp/
+- https://www.toplogwms.ru/
+- https://hflabs.ru/clients
+- https://atp.trade/
 
-### 2. Референс-лист является формальным артефактом российских закупок
+### Референс-лист — реальный procurement artifact
 
-Свежие тендеры 2026 требуют reference list как подтверждение опыта.
+Свежие закупки 2026 продолжают требовать референс-лист как подтверждение аналогичного опыта.
 
-Примеры Bidzaar:
+Особенно важны software/IT examples:
 
-- поставка ПО Kaspersky для Медси — `референс-лист с указанием аналогичных поставок за предыдущие 3 года`;
-- SCA/SAST software procurement Медси — тот же обязательный критерий;
-- ряд IT/engineering tenders включают отдельный XLSX/DOCX шаблон `Референс-лист`.
+- Медси, закупка Kaspersky — обязательный `референс-лист с указанием аналогичных поставок за предыдущие 3 года`;
+- Медси, закупка SCA/SAST software — тот же квалификационный критерий;
+- Медси, сопровождение 1С — тот же критерий;
+- Bidzaar содержит множество текущих закупок с отдельными шаблонами `Референс-лист`.
 
-Таким образом reference data нужно не только для live call, но и для tender package.
+Примеры:
 
-## Российский competitor sweep
+- https://bidzaar.com/app/process/light/019f931e-c9f8-7d76-ac51-1834fad1806d
+- https://bidzaar.com/app/process/light/01a06678-d303-70aa-9f57-1cca4df88641
+- https://bidzaar.com/app/process/light/01a05702-e1b7-75e2-a50a-ee4fa7f78d1b
 
-На 2026-09-16 bounded search не обнаружил purpose-built российского продукта с exact workflow:
+То есть demand-side thesis не была выдуманной.
 
-`customer-reference pool -> permissions/consent -> matching to opportunity/tender -> request/approval -> usage/cooldown -> call/visit/case -> deal influence`.
+## Western category также реальна
 
-Поиск по Bitrix24 Marketplace обнаруживает generic customer-base/CRM apps, но не reference-governance module.
+ReferenceEdge / Point of Reference, Influitive и другие продукты подтверждают отдельную зрелую категорию customer reference / advocacy management.
 
-Это НЕ доказывает отсутствие custom Bitrix24 implementations или внутренних решений крупных вендоров.
+ReferenceEdge закрывает registry, matching, request/approval, usage tracking, burnout protection and opportunity/revenue linkage.
 
-## Почему обычная CRM не полностью закрывает задачу
+Источники:
 
-В Bitrix24/amoCRM можно вручную создать поля/смарт-процесс:
+- https://www.point-of-reference.com/
+- https://www.softwareadvice.com/customer-reference-management/
 
-- reference yes/no;
-- industry;
-- product;
-- last used date.
+Проблема кандидата не в отсутствии зарубежного спроса.
 
-Поэтому product value не может быть `ещё одна таблица клиентов`.
+## Причина KILL №1 — SimpleOne B2B CRM уже вошёл прямо в reference workflow
 
-Purpose-built layer должен закрывать операционную governance:
+После более глубокого competitor sweep обнаружен критический факт, отсутствовавший в первоначальном pass.
 
-1. кто имеет право предложить клиента как reference;
-2. согласие/ограничения клиента;
-3. темы/продукты/география/отрасль, о которых он готов говорить;
-4. owner approval перед каждым новым запросом;
-5. cooldown / maximum usage / burnout protection;
-6. scheduling and reminders;
-7. outcome after call/visit;
-8. reference influence on opportunity/revenue;
-9. tender reference-list generation from approved current evidence;
-10. audit history — когда и кому клиент был предоставлен.
+В первом публичном релизе SimpleOne B2B CRM прямо заявлено:
 
-Западное существование ReferenceEdge как Salesforce-native specialised app подтверждает, что CRM configurability сама по себе не уничтожает category, но российский WTP надо доказать отдельно.
+- управление контентом;
+- автоматическое создание `референсов` на основе успешно завершённых потенциальных сделок;
+- привязка sales/content entities внутри одной B2B CRM.
 
-## Initial ICP
+Источник:
 
-Не малый бизнес.
+- https://community.simpleone.ru/t/reliz-simpleone-b2b-crm-1-0-0/519
+- https://docs.simpleone.ru/pages/viewpage.action?pageId=91537049
 
-Проверять:
+Ещё сильнее production evidence: в кейсе ITGLOBAL.COM среди реализованной CRM-функциональности прямо указано:
 
-- российские B2B software vendors;
-- IT integrators;
-- ERP/ECM/ITSM/cybersecurity vendors;
-- telecom/cloud vendors;
-- industrial automation/equipment vendors;
-- enterprise consulting/outsourcing;
-- companies that repeatedly participate in corporate tenders requiring reference lists.
+`управление клиентским опытом -> база знаний -> типовые кейсы и сценарии -> управление референсами и кейсами`.
 
-Market proxy: официальный реестр российского ПО в сентябре 2026 показывает ~32k software records и ~11.9k rightsholders. Это не TAM напрямую; большинство правообладателей не нуждаются в reference-management system. Но buyer universe потенциально шире нескольких десятков крупнейших vendors.
+Источник:
 
-## MVP
+- https://simpleone.ru/cases/itglobalcom-corporate-sales-automation-with-simpleone-b2b-crm
 
-Не строить Influitive.
+Это уже не просто generic CRM, в которой теоретически можно добавить поле. Российский enterprise B2B CRM в том же ICP уже имеет reference entity/workflow в продукте/внедрениях.
 
-V0:
+## Причина KILL №2 — оставшийся governance layer является low-code configuration
 
-1. Bitrix24 connection + CSV fallback;
-2. reference customer/contact registry;
-3. metadata: industry/product/project/use case/size/region;
-4. approved activities: tender list / logo / case / reference call / reference visit;
-5. availability + owner + consent status;
-6. usage counter/cooldown;
-7. request reference from a CRM opportunity;
-8. approve/reject workflow;
-9. schedule/complete reference activity;
-10. outcome + opportunity link;
-11. generate current tender reference list XLSX/PDF;
-12. dashboard of overused/unused references and influenced pipeline.
+Даже если считать, что текущий SimpleOne reference layer не содержит всех функций ReferenceEdge, оставшиеся части нашего V0 не требуют отдельного технического фундамента.
 
-No AI required in V0.
+Нужны:
 
-## OWNER_VERIFIABILITY_GATE
+- поля eligibility / industry / product / activity type;
+- owner / approver;
+- consent/status;
+- last-used / usage count / cooldown;
+- request stages;
+- approve/reject;
+- tasks/reminders;
+- link to opportunity;
+- generation of a tender reference list;
+- audit/history/reporting.
 
-Проходит хорошо.
+### Bitrix24 уже даёт необходимые primitives
 
-Можно взять controlled fixture:
+Текущая документация Bitrix24 подтверждает:
 
-- 30 reference customers;
-- known permissions/industries/products;
-- known cooldowns;
-- 5 active opportunities.
+- произвольные пользовательские поля в смарт-процессах;
+- запуск бизнес-процессов из CRM и смарт-процессов;
+- multi-step approvals;
+- tasks/notifications/history in CRM timeline;
+- document generation using fields of CRM/smart processes;
+- BI datasets over smart/business-process data;
+- Marketplace apps для внешнего согласования смарт-процессов клиентом/контрагентом.
 
-Проверяется объективно:
+Источники:
 
-- system suggests only eligible references;
-- blocked/overused customer is not offered;
-- approval reaches correct account owner;
-- completed call increments usage;
-- tender list contains only approved relevant projects;
-- opportunity receives correct influence marker.
+- https://helpdesk.bitrix24.ru/open/22088566/
+- https://helpdesk.bitrix24.ru/open/23509402/
+- https://helpdesk.bitrix24.ru/open/21290220/
+- https://helpdesk.bitrix24.ru/open/26286424/
+- https://helpdesk.bitrix24.ru/open/23962608/
+- https://www.bitrix24.ru/apps/app/atwebsite.soglasovanie_zakaza_s_klientom/
 
-Commercially measurable:
+Это означает, что значительную часть первоначального V0 можно реализовать как CRM configuration/template/app, не создавая отдельный standalone data/workflow platform.
 
-`time to find reference -> reference requests -> completed calls/visits -> influenced opportunities -> closed-won`.
+### BPMSoft создаёт тот же pressure
 
-## GENERAL_AI_SUBSTITUTION_GATE
+BPMSoft позволяет low-code настраивать собственные разделы, кейсы, стадии, BPM-процессы, роли, маршруты, проверки, сроки и эскалации.
 
-Проходит.
+Источники:
 
-Generic LLM can draft a reference list only after it receives current CRM/customer data and permissions. It does not maintain customer consent, availability, burnout limits, approvals, scheduling, usage history and opportunity attribution.
+- https://bpmsoft.ru/uslugi-avtomatizacii/konstruktor/
+- https://edu.bpmsoft.ru/treningi/praktika-primeneniya-notacii-bpmn-v-postroenii-biznes-processov-i-ispolzovanie-kejsov-v-bpmsoft/
 
-AI is optional enrichment, not the product.
+Это ещё один incumbent, для которого reference-governance является bounded configuration/add-on, а не новой платформой.
 
-## DATA_TRUST_GATE
+## Почему западный ReferenceEdge не спасает российский standalone thesis
 
-Moderate but acceptable.
+Факт существования Salesforce-native ReferenceEdge доказывает, что при большом enterprise market specialised add-on может жить поверх CRM.
 
-Product reads normal B2B CRM/customer-reference data, which is commercially sensitive but already entrusted to CRM systems. Pilot can start with a limited CSV of reference customers rather than full CRM access.
+Но Strategy B ищет российский gap с достаточной защитой.
 
-For customer contacts, personal-data handling/consent must be explicit. V0 can minimize stored personal fields and link back to CRM.
+В России одновременно:
 
-## Main risks
+1. ICP уже существенно уже глобального Salesforce enterprise market;
+2. SimpleOne прямо называет reference management частью B2B CRM use case;
+3. Bitrix24/BPMSoft позволяют быстро собрать specialised workflow;
+4. CRM integrator уже имеет distribution, customer data, permissions, opportunity links and workflow engine;
+5. наш продукт не получает network/data moat — в лучшем случае более красивый reference-specific UX.
 
-### 1. Bitrix24 smart-process substitution
+Следовательно, отличие `мы сделали reference UX лучше` недостаточно как structural moat.
 
-Biggest kill gate.
+## Gates
 
-If 15–20 target companies say they can implement sufficient reference governance in Bitrix24 in 1–2 days and have no pain around the manual process, standalone product is KILL.
+### OWNER_VERIFIABILITY_GATE
 
-### 2. Russian reference programs may be too small
+Проходил хорошо. Workflow детерминированно проверяем.
 
-A vendor with 30 enterprise customers and 5 salespeople can keep references in a spreadsheet. Product needs organizations with enough sales volume/reference activity for coordination overhead to be material.
+Это не причина KILL.
 
-### 3. Buyer role may be unclear
+### GENERAL_AI_SUBSTITUTION_GATE
 
-Possible owners:
+Также проходил. Generic LLM не поддерживает persistent consent/usage/approval state.
 
-- sales operations;
-- customer marketing;
-- customer success;
-- product marketing;
-- tender department.
+Это не причина KILL.
 
-If no single role owns budget/pain, sales becomes difficult.
+### DATA_TRUST_GATE
 
-### 4. Copyability by CRM integrators
+Умеренный. Reference/customer data уже живёт в CRM.
 
-Bitrix24 integrator can build custom workflow. Defensibility must come from polished reference-specific workflow, benchmark/templates, history, integrations and distribution, not proprietary technology.
+Это тоже не причина KILL.
 
-## Next kill tests
+### MARKET GAP / DEFENSIBILITY GATE
 
-1. Find 30 Russian B2B vendors/integrators that publicly advertise references/reference visits or repeatedly submit reference lists.
-2. Interview/contact 15–20 sales/tender/customer-success teams:
-   - where reference pool lives now;
-   - how often requests occur;
-   - time to find/approve correct customer;
-   - whether the same customer gets overused;
-   - whether consent/availability is tracked;
-   - how tender reference lists are assembled;
-   - whether reference impact is tracked in CRM.
-3. Ask one decisive question: `Почему не сделать это смарт-процессом в Битрикс24?`
-4. Concierge pilot with no product: spreadsheet/reference registry + manual matching for 2–3 vendors and measure requests/time saved.
-5. WTP test around annual B2B contract, not micro-SaaS pricing.
+Не проходит.
 
-## Preliminary assessment
+Критическая проблема — core workflow уже находится внутри российского B2B CRM и легко расширяется low-code средствами incumbents.
 
-`7.5/10` research candidate.
+## Возможная форма, которая остаётся, но не является нашим Strategy-B кандидатом
 
-Strong:
+Можно построить:
 
-- mature western category and high price signals;
-- Russian reference/tender workflow is directly evidenced;
-- bounded search found no direct local product;
-- owner-verifiable;
-- no expensive external API;
-- no narrow expert correctness problem;
-- generic AI does not replace workflow.
+- готовый Bitrix24 smart-process/template;
+- Marketplace app;
+- SimpleOne/BPMSoft implementation package;
+- consulting + reference-program setup.
 
-Weak:
+Это может быть полезным небольшим продуктом/услугой, но не показана достаточная защита и отдельный TAM для приоритетного standalone SaaS бизнеса.
 
-- likely narrow ICP (enterprise B2B sales only);
-- Bitrix24/manual process is a strong substitute;
-- copyability is materially higher than network-effect products;
-- WTP in Russia not yet proved.
+## Не возвращаться как
 
-Status stays `PROMISING__DEEP_RESEARCH_REQUIRED__BITRIX_SUBSTITUTION_AND_TAM_TO_VALIDATE`, not GO.
+- `ReferenceEdge for Russia`;
+- customer-reference registry for Bitrix24;
+- reference visit approval workflow;
+- tender reference-list generator;
+- advocate cooldown / overuse tracker;
+
+без нового structural wedge, который российские CRM/incumbents не могут закрыть configuration/add-on и за который доказана отдельная высокая willingness-to-pay.
+
+## Final status
+
+`KILL__CORE_WORKFLOW_ALREADY_NATIVE_OR_LOW_CODE_IN_RUSSIAN_B2B_CRM`
+
+Боль и зарубежная категория доказаны. Российский standalone market gap/defensibility — нет.
