@@ -1,211 +1,143 @@
 # B1 — Continuous Security Posture for Yandex 360
 
-Дата: 2026-09-16
+Дата закрытия: 2026-09-16
 
-Статус: `PROMISING__DEEP_RESEARCH_REQUIRED__CHANNEL_AND_WTP_TO_VALIDATE`
+Статус: `KILL__ADJACENT_INCUMBENT_ALREADY_HAS_REQUIRED_PLATFORM_AND_DISTRIBUTION`
 
-## Коротко
+## Идея
 
 Узкий российский SSPM-класс для Яндекс 360 for Business:
 
-`подключить организацию -> автоматически проверить security posture по официальному стандарту Яндекс 360 -> постоянно отслеживать drift -> показать PASS/FAIL, evidence и конкретное исправление -> журнал изменений / отчёт`
+`подключить организацию -> автоматически проверить security posture по официальному стандарту Яндекс 360 -> постоянно отслеживать drift -> PASS/FAIL + evidence + remediation -> история/отчёт`.
 
-Первый wedge — только Яндекс 360. Не делать сразу универсальную кибербезопасность.
+Изначально кандидат выглядел сильным: Яндекс в июне 2026 опубликовал официальный security standard и API-проверки, рынок Яндекс 360 крупный, а результат детерминированно проверяем владельцем.
 
-## Почему это не выдуманный security checklist
+После углублённого competitor sweep кандидат закрыт.
 
-Яндекс сам опубликовал в 2026 году официальный стандарт по защите и безопасному использованию Яндекс 360. В текущей версии есть 14 именованных контролей `Y360-*`, включая:
+## Что подтвердилось
 
-- минимизацию числа администраторов;
-- обязательную 2FA;
-- парольную политику;
-- recovery владельца;
-- ограничение cookie/session TTL;
-- блокировку неактивных пользователей;
-- включение и мониторинг аудит-логов;
-- secure phone;
-- DLP-routing;
-- запрет личных @yandex.ru аккаунтов в организации;
-- SSO;
-- ревизию OAuth/service applications и scopes;
-- запрет внешней OAuth-аутентификации;
-- allowlist/service-app restrictions.
+### Боль и техническая возможность реальны
 
-Критически важно: стандарт прямо указывает, как проверять большинство контролей через официальный API Яндекс 360. Яндекс отдельно пишет, что аудит всех рекомендаций можно автоматизировать скриптами.
+Яндекс публикует рекомендации по защите Яндекс 360 и прямо говорит, что аудит можно автоматизировать скриптами через API. Клиент по shared-responsibility отвечает за настройки доступов, паролей, 2FA, внутренний аудит и другие tenant-side меры.
 
-Источники:
+Документация:
 
 - https://yandex.cloud/ru/docs/security/standard-360/all
+- https://yandex.ru/support/yandex-360/business/admin/ru/security/security-recommendations
 - https://yandex.ru/dev/api360/doc/ru/
 
-Это даёт owner-verifiable ground truth: правило не придумывает AI; система либо читает официальный параметр/API правильно, либо нет.
+API позволяет одному пользователю управлять не более чем 500 организациями, поэтому MSP/partner multi-tenant model технически правдоподобна:
 
-## Demand proved abroad
+- https://yandex.ru/dev/api360/doc/ru/limits
 
-SSPM — зрелый западный класс.
+### Большая часть checklist действительно автоматизируема
 
-### AppOmni
+У Яндекса есть API для 2FA, password policy, session TTL, inactive-user analysis, secure phone, routing/DLP, portal-account checks, OAuth restrictions, service applications и других security settings.
 
-- защищает 101+ млн SaaS user accounts;
-- анализирует около 2 млрд security events/day;
-- публичный AWS Marketplace listing: $7,500/year за блок 100 пользователей одного SaaS;
-- категория включает continuous posture, identities, connected apps, compliance и remediation.
-
-Источники:
-
-- https://appomni.com/about-us/
-- https://aws.amazon.com/marketplace/pp/prodview-esohvavnjpcka
-
-Также класс подтверждают Palo Alto SaaS Security, Obsidian, Reco и другие SSPM-вендоры.
-
-## Российский underlying market
-
-По официальным данным Яндекса за I полугодие 2026:
-
-- более 185,000 организаций используют Яндекс 360;
-- 8.9 млн платных учётных записей;
-- 2.4 млн платных аккаунтов относятся к крупному бизнесу;
-- выручка Яндекс 360 за I полугодие 2026 — 11.6 млрд ₽, +42% YoY;
-- партнёрская сеть — 390 компаний;
-- выручка партнёрского канала +57% YoY.
+Отдельный независимый разбор Александра Жогова (+Альянс) от сентября 2026 прошёл текущую страницу рекомендаций построчно и насчитал 10 API-проверяемых пунктов из 18 и 5 пунктов, которые можно ещё и автоматически настраивать.
 
 Источник:
 
-- https://www.yandex.ru/company/news/12-08-2026-01
-- https://360.yandex.ru/blog/news/bolee-185-tis-organizatsii-yandeks-360-obyavlyaet-finansovie-rezultati-za-pervoe-polugodie/
+- https://habr.com/ru/articles/1077890/
 
-Это на порядки больший reachable platform market, чем у browser-extension payments.
+Это подтверждает, что сам workflow не выдуман.
 
-## Почему встроенная безопасность Яндекс 360 не закрывает задачу полностью
+## Причина KILL — +Альянс уже занял соседний слой настолько близко, что posture является для него фичей
 
-Яндекс даёт сами настройки, API, audit logs и официальный security standard. Но текущая документация прямо перекладывает ответственность за безопасную конфигурацию tenant на клиента и предлагает автоматизировать аудит собственными скриптами.
+Критический конкурентный факт обнаружился после первичного sweep.
 
-То есть провайдер предоставляет `controls + API + benchmark`, но не найден отдельный managed continuous layer уровня:
+Компания +Альянс уже продаёт продукт:
 
-`каждый день проверить все Y360 controls -> увидеть drift -> evidence -> ticket/remediation -> история -> multi-tenant dashboard`.
+`+Альянс Поток`
 
-Это важное различие: продукт не заменяет безопасность Яндекса, а автоматизирует customer-side shared-responsibility.
+- https://plus-aliance.ru/solutions/automation/potok/
 
-## Bounded competitor sweep
+Это специализированный automation layer поверх Яндекс 360, а не generic integrator.
 
-На 2026-09-16 не найден прямой российский продукт, который публично заявляет continuous SSPM именно для Яндекс 360 по official Y360 controls.
+Публично заявлены:
 
-Найдены adjacent решения:
+- OAuth-подключение организации Яндекс 360;
+- работа по событиям и расписанию;
+- 18 типов триггеров;
+- visual workflow engine;
+- HTTP/webhook integrations;
+- журнал выполнения;
+- готовые templates;
+- user/group/department administration;
+- onboarding/offboarding workflows;
+- security-alert scenarios;
+- audit-log integration / SIEM export add-on;
+- multi-step automatic actions;
+- коммерческие тарифы от 14 900 RUB/month per organization;
+- отдельные enterprise/add-on уровни.
 
-- Kaspersky KUMA умеет принимать/нормализовать события Яндекс 360 — это SIEM/event analytics, а не posture-as-code;
-- Solar Dozor и Staffcop контролируют почтовый/пользовательский канал — DLP/UEBA, не security configuration posture;
-- Yandex Security Deck CIEM относится к Yandex Cloud IAM, не к Яндекс 360 tenant posture;
-- сам Яндекс 360 даёт API и рекомендации, но предлагает клиенту автоматизировать аудит самостоятельно.
+Security-alert functionality уже публично описана:
 
-Отсутствие найденного аналога не доказывает, что скрытых MSSP/скриптов нет. Нужен отдельный sweep среди 390 партнёров Яндекс 360.
+- https://plus-aliance.ru/news/pro-business/alerty-bezopasnosti-v-yandeks-360-kak-nastroit-kontrol-riskovykh-deystviy-v-alyans-potoke/
 
-## Сильный distribution wedge — партнёры Яндекс 360
+Также +Альянс уже выпускает продукты для backup/migration Яндекс 360 и специализируется на automation вокруг cloud-office platform.
 
-Яндекс официально говорит, что партнёры зарабатывают на внедрении, администрировании, миграции, техподдержке и других услугах. По состоянию на H1 2026 партнёрская сеть — 390 компаний.
+## Почему отсутствие отдельной кнопки `Posture Score` нас не спасает
 
-Это может быть лучший ICP, чем продавать каждой организации напрямую:
+Bounded search не показал, что +Альянс сегодня продаёт отдельный экран с названием `SSPM` или `Posture Score`.
 
-`партнёр/MSSP -> подключает 10/50/200 customer tenants -> единый dashboard posture -> recurring managed-security service`.
+Но это недостаточно для Strategy B gap.
 
-Так появляется multi-tenant economics и понятный канал дистрибуции.
+У действующего игрока уже есть практически все дорогие компоненты:
 
-Источники:
+1. OAuth connection к tenant;
+2. scheduler;
+3. event collection;
+4. API actions;
+5. security alerts;
+6. logs/history;
+7. customer trust;
+8. pricing;
+9. Яндекс 360 expertise;
+10. existing customer/distribution channel.
 
-- https://360.yandex.ru/business/partners-program/
-- https://360.yandex.ru/business/partners/
+Более того, основатель компании уже исследовал ровно официальный security checklist и расписал API methods и auto-remediation possibilities.
 
-## MVP
+Следовательно:
 
-V0 только read-only и только официальный стандарт.
+`official Y360 checklist -> scheduled checks -> findings -> ticket/action -> report`
 
-1. OAuth/app connection к одной организации Яндекс 360.
-2. Автоматические проверки всех API-измеримых `Y360-*` controls.
-3. PASS / FAIL / NOT_AUTOMATABLE.
-4. Evidence: какой API/поле дало результат.
-5. Официальная ссылка на remediation instruction.
-6. Daily/weekly rescan и drift history.
-7. Alert при переходе PASS -> FAIL.
-8. PDF/HTML report для администратора/ИБ.
-9. Multi-tenant mode для партнёра как следующий bounded step.
+для +Альянс является естественным небольшим extension существующего продукта, а не новой архитектурой или новым рынком.
 
-Не делать в первом MVP:
+Это повторяет урок R1/Parsing.agency: нельзя считать moat то, что сильный соседний игрок может добавить за несколько недель и сразу продать существующей базе.
 
-- собственный SIEM;
-- DLP;
-- anomaly ML;
-- авто-ремедиацию write API;
-- VK WorkSpace/Bitrix24;
-- generic compliance engine.
+## Параллельная гипотеза BetterCloud-for-Yandex-360 — также закрыта
 
-## OWNER_VERIFIABILITY_GATE
+Во время исследования появилась более широкая формулировка:
 
-Проходит хорошо.
+`event -> rule -> automated action for Yandex 360 administration`
 
-Для тестового tenant можно вручную включать/выключать конкретные настройки и сверять:
+Она закрывается +Альянс Потоком ещё прямее.
 
-`2FA off -> FAIL`
-`2FA on -> PASS`
-`cookie TTL = 0 -> FAIL`
-`cookie TTL <= 604800 -> PASS`
-`лишнее service application -> finding`
-`OAuth restriction off -> FAIL`
+Поток уже автоматизирует onboarding/offboarding, account operations, groups/departments, session revoke, mail/files, schedules, webhooks and external integrations.
 
-Каждый результат воспроизводим через официальный API и консоль Яндекса.
+Поэтому не возвращаться к формулировкам:
 
-## GENERAL_AI_SUBSTITUTION_GATE
+- BetterCloud for Yandex 360;
+- Zapier/n8n for Yandex 360 administration;
+- Yandex 360 offboarding automation;
+- Yandex 360 security alerts;
+- scheduled Yandex 360 security checklist;
 
-Проходит.
+без принципиально нового workflow, который структурно не может быть добавлен +Альянсом.
 
-LLM может написать разовый скрипт, но не заменяет continuous connection, credential lifecycle, scheduled checks, drift history, multi-tenant partner dashboard, evidence trail и alerts.
+## OWNER_VERIFIABILITY и AI gates были хорошими, но этого недостаточно
 
-## DATA_TRUST_GATE
+Кандидат отлично проходил owner-verifiability: тестовую настройку можно переключить и проверить API PASS/FAIL.
 
-Средний риск, но контролируемый.
+Generic AI не заменяет continuous OAuth connection, scheduling, history and remediation.
 
-Потребуется OAuth/service-app access к административным security данным tenant. Поэтому V0 должен быть read-only, минимальные scopes, прозрачный перечень читаемых данных, отсутствие чтения содержимого почты/файлов там, где контроль этого не требует.
+Однако Strategy B требует не только реальной боли, но и defensibility / real market gap. После обнаружения +Альянс этого условия нет.
 
-Для крупных клиентов позже может понадобиться self-hosted/on-prem collector.
+## Final status
 
-## Главные kill-risks
+`KILL__ADJACENT_INCUMBENT_ALREADY_HAS_REQUIRED_PLATFORM_AND_DISTRIBUTION`
 
-### 1. Яндекс сам может встроить posture dashboard
+Боль и рынок реальны, но наш первоначальный wedge уже лежит внутри естественной продуктовой поверхности существующего российского игрока.
 
-Это главный platform risk. Поскольку стандарт и API принадлежат Яндексу, native product technically straightforward.
-
-Защита должна быть в cross-tenant partner workflow, history, reporting и позже multi-SaaS coverage, а не в самих 14 checks.
-
-### 2. Клиентам может хватать разового скрипта/аудита
-
-Если security posture меняется редко и willingness-to-pay за continuous monitoring низкая — отдельный SaaS слаб.
-
-### 3. Партнёры уже могут иметь внутренние скрипты
-
-Нужно опросить/проверить минимум 15–20 партнёров из официального каталога: как они сейчас проводят security review, есть ли recurring service, сколько времени занимает один tenant.
-
-### 4. High-end customers могут уже собирать всё в SIEM/IAM
-
-ICP V0 вероятнее: средний бизнес и партнёры, у которых есть много tenant-ов, но нет собственной security engineering команды.
-
-## Следующий kill test
-
-1. Sweep 30–50 официальных партнёров Яндекс 360: найти публичные security-audit/managed-security offerings и прямой аналог.
-2. Интервью/контакт 15–20 партнёров: делают ли они проверки official standard вручную/скриптами, сколько customer tenants, готовы ли платить за multi-tenant automation.
-3. Проверить, сколько из 14 official controls действительно полностью автоматизируются current API без чтения чувствительного content.
-4. Проверить частоту drift на тестовых/реальных tenants: если за месяцы почти ничего не меняется, continuous value слаб.
-5. Узнать готовность платить по модели `₽/tenant/month` или `₽/100 users/month`.
-
-## Предварительная оценка
-
-`8/10` как исследовательский кандидат.
-
-Сильнее текущего WorkOS-RU по:
-
-- размеру локального platform market;
-- официальному машиночитаемому ground truth;
-- owner-verifiability;
-- локальной специфике, которую западный AppOmni обычно не покрывает;
-- готовому partner channel из 390 компаний.
-
-Слабее по defensibility: Яндекс или крупный ИБ/партнёр может относительно быстро повторить basic checks.
-
-Статус: `PROMISING__DEEP_RESEARCH_REQUIRED__CHANNEL_AND_WTP_TO_VALIDATE`, не GO.
+Не строить и не возвращать как новую идею без нового факта, который создаёт структурный барьер для +Альянс Потока, а не просто ещё одну security-check feature.
