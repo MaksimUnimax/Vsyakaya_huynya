@@ -4,7 +4,7 @@
 Reproduces the author's five published pairs and Kalman signals, then compares:
 1) the repository's residual-difference PnL accounting;
 2) a self-financing price-PnL accounting where changing alpha/beta is NOT profit;
-3) the same corrected accounting with explicit dynamic-beta turnover costs.
+3) the same corrected accounting plus an incremental cost for re-hedging beta while a position stays open.
 
 The goal is not to propose a trading strategy. It isolates whether the reported
 Sharpe can be created by revaluing yesterday's position with today's fitted model.
@@ -57,7 +57,6 @@ def kalman_filter(y1: pd.Series, y2: pd.Series, delta: float = DELTA) -> pd.Data
 
     alpha = np.full(n, np.nan)
     beta = np.full(n, np.nan)
-    innovation = np.full(n, np.nan)
     z = np.full(n, np.nan)
 
     for t in range(warm, n):
@@ -69,7 +68,6 @@ def kalman_filter(y1: pd.Series, y2: pd.Series, delta: float = DELTA) -> pd.Data
         theta = theta + K * e
         P = (np.eye(2) - np.outer(K, H)) @ P_pred
         alpha[t], beta[t] = theta
-        innovation[t] = e
         z[t] = e / math.sqrt(S)
 
     return pd.DataFrame({"alpha": alpha, "beta": beta, "zscore": z}, index=y1.index)
@@ -109,11 +107,13 @@ def original_returns(prices, kf, pos, a, b):
     return (gross - cost).fillna(0.0)
 
 
-def corrected_returns(prices, kf, pos, a, b, charge_beta_turnover: bool):
+def corrected_returns(prices, kf, pos, a, b, add_beta_rehedge_cost: bool):
     """Self-financing PnL: only asset-price moves generate profit.
 
     beta_known[t] is yesterday's fitted beta and is therefore available before
     the t return interval. alpha never appears in PnL because it is not tradable.
+    The base cost deliberately keeps the author's entry/exit cost convention so
+    the first correction isolates only the PnL-accounting defect.
     """
     beta_known = kf["beta"].shift(1)
     p1, p2 = prices[a], prices[b]
@@ -122,17 +122,19 @@ def corrected_returns(prices, kf, pos, a, b, charge_beta_turnover: bool):
     price_pnl = d1 - beta_known * d2
     gross = pos * price_pnl / capital.clip(lower=1e-8)
 
-    if not charge_beta_turnover:
-        cost = pos.diff().abs() * TC * 2
-    else:
-        # Desired unit-spread holdings during each interval.
-        q1 = pos
-        q2 = -pos * beta_known
-        dq1 = q1.diff().abs()
-        dq2 = q2.diff().abs()
-        turnover_dollars = dq1 * p1.shift(1).abs() + dq2 * p2.shift(1).abs()
-        cost = TC * turnover_dollars / capital.clip(lower=1e-8)
-    return (gross - cost).fillna(0.0)
+    base_cost = pos.diff().abs() * TC * 2
+    extra = pd.Series(0.0, index=pos.index)
+    if add_beta_rehedge_cost:
+        # When the same spread position remains open, a changing beta requires
+        # buying/selling the second leg. The original backtest charges nothing
+        # for that turnover. Charge it incrementally on top of the author's base
+        # entry/exit cost so this sensitivity can only reduce returns.
+        same_active = (pos == pos.shift(1)) & (pos != 0)
+        delta_beta = (beta_known - beta_known.shift(1)).abs()
+        rehedge_notional = delta_beta * p2.shift(1).abs()
+        extra = (TC * rehedge_notional / capital.clip(lower=1e-8)).where(same_active, 0.0)
+
+    return (gross - base_cost - extra).fillna(0.0)
 
 
 def phantom_component(prices, kf, pos, a, b):
@@ -174,7 +176,7 @@ def main():
         key = f"{a}/{b}"
         orig_df[key], corr_df[key], corr_turn_df[key], phantom_df[key] = o, c, ct, ph
         row = {"pair": key, "original": metrics(o), "corrected_same_cost": metrics(c),
-               "corrected_beta_turnover": metrics(ct),
+               "corrected_plus_beta_rehedge": metrics(ct),
                "phantom_sum": float(ph.sum()),
                "original_minus_corrected_sum": float((o-c).sum())}
         pair_rows.append(row)
@@ -189,7 +191,7 @@ def main():
         "portfolio": {
             "original": metrics(po),
             "corrected_same_cost": metrics(pc),
-            "corrected_beta_turnover": metrics(pct),
+            "corrected_plus_beta_rehedge": metrics(pct),
             "phantom_sum": float(pph.sum()),
             "original_minus_corrected_sum": float((po-pc).sum()),
         }
@@ -198,15 +200,15 @@ def main():
 
     lines = ["# Independent Kalman PnL audit", "",
              f"Data: {result['first_date']} -> {result['last_date']} ({result['data_rows']} rows)", "",
-             "| Pair | Original Sharpe | Corrected Sharpe | + beta-turnover cost | Original total | Corrected total |",
+             "| Pair | Original Sharpe | Corrected Sharpe | Corrected + beta rehedge | Original total | Corrected total |",
              "|---|---:|---:|---:|---:|---:|"]
     for r in pair_rows:
-        lines.append(f"| {r['pair']} | {r['original']['sharpe']:.3f} | {r['corrected_same_cost']['sharpe']:.3f} | {r['corrected_beta_turnover']['sharpe']:.3f} | {r['original']['total_return']:.2%} | {r['corrected_same_cost']['total_return']:.2%} |")
+        lines.append(f"| {r['pair']} | {r['original']['sharpe']:.3f} | {r['corrected_same_cost']['sharpe']:.3f} | {r['corrected_plus_beta_rehedge']['sharpe']:.3f} | {r['original']['total_return']:.2%} | {r['corrected_same_cost']['total_return']:.2%} |")
     P=result['portfolio']
     lines += ["", "## Portfolio", "",
               f"- Original formula: Sharpe **{P['original']['sharpe']:.3f}**, total **{P['original']['total_return']:.2%}**, maxDD **{P['original']['max_drawdown']:.2%}**",
               f"- Correct self-financing PnL, same entry/exit cost convention: Sharpe **{P['corrected_same_cost']['sharpe']:.3f}**, total **{P['corrected_same_cost']['total_return']:.2%}**, maxDD **{P['corrected_same_cost']['max_drawdown']:.2%}**",
-              f"- Correct PnL + dynamic-beta turnover cost: Sharpe **{P['corrected_beta_turnover']['sharpe']:.3f}**, total **{P['corrected_beta_turnover']['total_return']:.2%}**, maxDD **{P['corrected_beta_turnover']['max_drawdown']:.2%}**",
+              f"- Same corrected PnL + incremental beta-rehedge cost: Sharpe **{P['corrected_plus_beta_rehedge']['sharpe']:.3f}**, total **{P['corrected_plus_beta_rehedge']['total_return']:.2%}**, maxDD **{P['corrected_plus_beta_rehedge']['max_drawdown']:.2%}**",
               f"- Sum of explicit model-state 'phantom' component (portfolio daily-return units): **{P['phantom_sum']:.6f}**",
               "", "Interpretation: changing fitted alpha/beta is not a cash flow. If the original headline collapses under self-financing accounting, the Kalman filter did not create trading alpha; the backtest was monetizing model re-fitting."]
     report="\n".join(lines)+"\n"
