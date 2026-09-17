@@ -7,6 +7,7 @@ on:
     paths:
       - 'repo-radar/ludka/audits/vela_fill_audit.py'
       - 'repo-radar/ludka/audits/vela_outcome_audit.py'
+      - 'repo-radar/ludka/audits/vela_series_fee_audit.py'
       - '.github/workflows/ludka-vela-fill-audit.yml'
   workflow_dispatch:
 
@@ -32,11 +33,16 @@ jobs:
         env:
           AUDIT_OUT: audit-out
         run: python repo-radar/ludka/audits/vela_outcome_audit.py | tee outcome-console.txt
+      - name: Run series and fee arithmetic audit
+        env:
+          AUDIT_OUT: audit-out
+        run: python repo-radar/ludka/audits/vela_series_fee_audit.py | tee series-fee-console.txt
       - name: Show machine reports
         if: always()
         run: |
           test -f audit-out/audit_report.md && cat audit-out/audit_report.md || true
           test -f audit-out/outcome_audit.md && cat audit-out/outcome_audit.md || true
+          test -f audit-out/series_fee_audit.md && cat audit-out/series_fee_audit.md || true
           test -f audit-out/probe.json && cat audit-out/probe.json || true
       - name: Upload audit evidence
         if: always()
@@ -51,7 +57,10 @@ jobs:
             audit-out/outcome_audit.md
             audit-out/outcome_audit.json
             audit-out/outcomes.json
+            audit-out/series_fee_audit.md
+            audit-out/series_fee_audit.json
             audit-out/probe.json
             audit-out/fill_calibration_btc.parquet
             audit-console.txt
             outcome-console.txt
+            series-fee-console.txt
