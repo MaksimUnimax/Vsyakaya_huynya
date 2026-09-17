@@ -1,5 +1,6 @@
 name: Ludka Vela Fill Audit
 
+# Three-pass reproducible adversarial audit: parquet -> settlements -> series/fees.
 on:
   push:
     branches:
