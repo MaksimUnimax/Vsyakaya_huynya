@@ -1,0 +1,45 @@
+name: Ludka Vela Fill Audit
+
+on:
+  push:
+    branches:
+      - 'лудка'
+    paths:
+      - 'repo-radar/ludka/audits/vela_fill_audit.py'
+      - '.github/workflows/ludka-vela-fill-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install audit dependencies
+        run: python -m pip install --disable-pip-version-check pandas pyarrow numpy requests
+      - name: Run independent audit
+        env:
+          AUDIT_OUT: audit-out
+        run: python repo-radar/ludka/audits/vela_fill_audit.py | tee audit-console.txt
+      - name: Show machine report
+        if: always()
+        run: |
+          test -f audit-out/audit_report.md && cat audit-out/audit_report.md || true
+      - name: Upload audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vela-fill-audit
+          if-no-files-found: warn
+          path: |
+            audit-out/audit_report.md
+            audit-out/audit_report.json
+            audit-out/kalshi_outcomes.json
+            audit-out/fill_calibration_btc.parquet
+            audit-console.txt
