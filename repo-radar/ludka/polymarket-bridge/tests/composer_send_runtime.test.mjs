@@ -26,9 +26,11 @@ class FakeElement {
     this.listeners.set(type, list.filter((item) => item !== fn));
   }
   click() { this.clickCount += 1; }
+  getBoundingClientRect() { return { width: 120, height: 32, top: 0, left: 0, right: 120, bottom: 32 }; }
 }
 
 globalThis.Element = FakeElement;
+globalThis.getComputedStyle = () => ({ display: "block", visibility: "visible", opacity: "1" });
 globalThis.document = {
   addEventListener() {},
   removeEventListener() {}
