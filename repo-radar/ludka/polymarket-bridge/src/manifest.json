@@ -1,9 +1,12 @@
 {
   "manifest_version": 3,
   "name": "Polymarket Bridge — ChatGPT ↔ Polymarket",
-  "version": "0.1.0",
-  "description": "Read-only research bridge from ChatGPT code-block commands to public Polymarket Gamma/CLOB/Data APIs, with bounded result delivery back into the same chat.",
-  "permissions": ["storage", "tabs"],
+  "version": "0.1.1",
+  "description": "Read-only research bridge from ChatGPT code-block commands to public Polymarket Gamma/CLOB/Data APIs, with bounded text delivery and chunked JSON file attachment delivery for large results.",
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
   "host_permissions": [
     "https://chatgpt.com/*",
     "https://chat.openai.com/*",
@@ -16,13 +19,18 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*"
+      ],
       "js": [
         "product.js",
         "conversation_identity.js",
         "composer_send.js",
         "protocol.js",
-        "content_script.js"
+        "chatgpt_file_attachment.js",
+        "content_script.js",
+        "file_delivery_content.js"
       ],
       "run_at": "document_idle"
     }
