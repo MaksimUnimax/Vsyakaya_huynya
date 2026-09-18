@@ -1,9 +1,9 @@
 {
   "name": "polymarket-bridge",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node ../tests/protocol.test.mjs"
+    "test": "node ../tests/protocol.test.mjs && node ../tests/file_delivery_contract.test.mjs"
   }
 }
