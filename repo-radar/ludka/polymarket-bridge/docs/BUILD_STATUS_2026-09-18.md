@@ -1,74 +1,86 @@
 # Polymarket Bridge build status
 
 Date: 2026-09-18
-
-Current developer version: **0.1.1**
-
-Scope: **public read-only research bridge + bounded text/file delivery**.
+Current version: **0.1.2**
+Scope: **public read-only research bridge + text/file delivery + validated Send lifecycle**.
 
 ## Reference
 
-Owner-provided factual file-delivery reference:
+Owner-provided factual reference: `Yandex-Marketing-Bridge-0.1.9.zip`
 
-`Yandex-Marketing-Bridge-0.1.9.zip`
+SHA-256: `de4425a47645d537ef7b69994ef2df0f66c3e9bd6741b0b47884426bdd954c4c`
 
-SHA-256:
+## 0.1.1 live defect
 
-`de4425a47645d537ef7b69994ef2df0f66c3e9bd6741b0b47884426bdd954c4c`
+0.1.1 successfully completed:
 
-## 0.1.1 changes
+`provider -> IndexedDB chunks -> SHA-256 -> File -> DataTransfer -> ChatGPT attachment preview`
 
-- Manual action placement changed to the Yandex 0.1.9 overlay/layout model: fixed Shadow-DOM action surface, anchored to the code block's top-right geometry and repositioned on scroll/resize.
-- Large multi-command results no longer return `DELIVERY_TOO_LARGE`.
-- When serialized chat delivery exceeds 160,000 characters, the complete result is serialized as one JSON artifact.
-- Artifact persistence uses IndexedDB, ~256 KiB chunks, per-chunk SHA-256 and TTL cleanup.
-- Content runtime fetches chunks one-by-one, verifies metadata and SHA-256, creates a browser `File`, injects it into the ChatGPT file input using `DataTransfer`, and waits for a ready attachment preview.
-- Attachment delivery has durable phases and a Send commit barrier. After Send dispatch, automatic duplicate Send is forbidden.
-- Temporary artifact chunks are deleted only after the resulting user-turn is confirmed.
-- Full-corpus statistical analysis remains delegated to ChatGPT Work.
+but failed to automatically Send.
+
+Observed live:
+- JSON file attached;
+- summary text inserted;
+- ChatGPT displayed an enabled Send control;
+- bridge did not click it.
+
+Root cause: 0.1.1 copied the file transport but retained a simplified custom Send helper instead of the full Yandex 0.1.9 `composer_send.js` mechanics. It missed the complete candidate/stability/same-form/fingerprint/final-validation/click pipeline.
+
+Therefore **0.1.1 FILE AUTO-SEND = REJECTED**.
+
+## 0.1.2 correction
+
+0.1.2 replaces that path with the reference-derived lifecycle:
+
+1. resolve composer context;
+2. enumerate Send candidates including `#composer-submit-button`;
+3. require visible + enabled target;
+4. require same composer form/root;
+5. require composer text unchanged;
+6. require attachment-ready;
+7. require 3 stable target samples;
+8. persist target fingerprint;
+9. re-resolve and validate after durable commit;
+10. call `clickSynchronously`;
+11. persist click trace / dispatched state;
+12. confirm a matching new user-turn;
+13. cleanup artifact only after confirmation;
+14. never automatically Send a second time after click dispatch.
 
 ## CI acceptance
 
-GitHub Actions run:
+Exact candidate commit: `bebd56ea282d566b063de20b9b2c58909cf09845`
 
-`35316206939`
+GitHub Actions run: `35320777878`
 
-Commit tested:
+Job: `105522558941`
 
-`69fe97e0f7bf7402b1b3f8b8072746c5aada0afa`
+Verdict: **SUCCESS**
 
-Job:
-
-`105508282829`
-
-Result: **SUCCESS**
-
-Passed steps:
-
-- JavaScript syntax checks;
+Passed:
+- syntax checks including `composer_send.js`;
 - manifest parse;
 - protocol tests;
 - file-delivery contract tests;
+- explicit reference-Send assertions;
 - installable ZIP build;
 - artifact upload.
 
-## Exact installable ZIP
+## Exact artifact
 
-Inner installable ZIP SHA-256:
+Actions artifact id: `10536738619`
 
-`6b059ecd3b75c40ad38c840606d5bf90063913c35e6f83f02a7c9cd5c744f8d4`
+Outer artifact SHA-256:
+`f890ab2f6abee72459d070b86ffc707900d517d94faba29118eb0494e475a831`
 
-GitHub Actions artifact archive SHA-256:
+Exact inner installable ZIP SHA-256:
+`4800090d173f075da6c97c5f2151b39a0533d626a5b9af35363bde91400afe59`
 
-`7ff35833b4aba11691c223819b8a58de41ca1440bed9cea54ea9b20bc9218aa6`
+Fresh extraction verified:
+- `manifest.json` at ZIP root;
+- version `0.1.2`;
+- product `Polymarket Bridge — ChatGPT ↔ Polymarket`.
 
-The installable ZIP contains `manifest.json` at archive root.
+## Remaining gate
 
-## Required live acceptance for 0.1.1
-
-1. Update/reinstall the extension from the 0.1.1 ZIP.
-2. Confirm the Polymarket action is positioned at the code block's top-right area instead of a separate row.
-3. Re-run the previous five-command batch that produced ~282k serialized characters.
-4. Expected result: a short Polymarket Bridge summary **plus a JSON attachment**, not `DELIVERY_TOO_LARGE`.
-5. Open the attachment and verify it contains all five result envelopes.
-6. Confirm only one ChatGPT user-turn is sent and no duplicate Send occurs.
+**CI PASS / LIVE 0.1.2 AUTO-SEND PENDING OWNER RERUN.**
