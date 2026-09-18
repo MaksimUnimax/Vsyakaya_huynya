@@ -1,0 +1,30 @@
+name: Ludka Polymarket Bridge
+
+on:
+  push:
+    branches: ["лудка"]
+    paths:
+      - "repo-radar/ludka/polymarket-bridge/**"
+      - ".github/workflows/ludka-polymarket-bridge.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax
+        run: |
+          node --check repo-radar/ludka/polymarket-bridge/src/protocol.js
+          node --check repo-radar/ludka/polymarket-bridge/src/service_worker.js
+          node --check repo-radar/ludka/polymarket-bridge/src/content_script.js
+          node --check repo-radar/ludka/polymarket-bridge/src/popup.js
+          node -e 'JSON.parse(require("fs").readFileSync("repo-radar/ludka/polymarket-bridge/src/manifest.json","utf8")); console.log("manifest: PASS")'
+      - name: Protocol tests
+        run: node repo-radar/ludka/polymarket-bridge/tests/protocol.test.mjs
