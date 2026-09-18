@@ -46,3 +46,36 @@ The large-corpus Work prompt must preserve this as an integrity gate: resolution
 3. historical price endpoint works or returns a controlled provider error;
 4. malformed command yields controlled chat-visible error and does not consume the following valid command;
 5. result-size cap fails boundedly.
+
+
+## Live smoke #2 — multi-command + legacy history
+
+One code block contained, in source order:
+
+1. `market.get id=12`
+2. `priceHistory.get` for that market's YES token with `interval=max`, `bucketSeconds=86400`.
+
+Observed:
+- envelope: `POLYMARKET_BATCH_RESULT_V1`
+- count: `2`
+- command 1: HTTP 200 / OK / request_executed=true
+- command 2: HTTP 200 / OK / request_executed=true
+- command 2 result: empty `data: []`, no pagination continuation.
+
+Verdict:
+- multi-command discovery: **PASS**
+- source-order serial execution: **PASS**
+- later command does not destroy earlier successful result: **PASS**
+- public historical-price endpoint transport: **PASS**
+- historical coverage for this 2020 token: **NO DATA**
+
+### Research consequence
+
+A resolved-market corpus cannot assume uniform price-history retention back to Polymarket's earliest markets. Full-corpus Work must first produce a coverage matrix by market year/date/horizon and explicitly distinguish:
+
+- market metadata available;
+- outcome/resolution identifiable;
+- historical price series available;
+- historical trade series available.
+
+Missing historical price data must never be imputed as zero or treated as a no-trade observation.
