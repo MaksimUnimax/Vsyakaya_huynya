@@ -460,6 +460,7 @@ async function commitAttachmentSend(message, sender) {
     send_marker: String(message.send_marker || owned.entry.report_text || ""),
     baseline_message_ids: Array.isArray(message.baseline_message_ids) ? message.baseline_message_ids.map(String).slice(0, 1000) : [],
     expected_attachment_names: provided,
+    send_target_fingerprint: message.send_target_fingerprint || null,
     send_click_dispatched: false
   });
   return { ok: true, outbox: next };
@@ -472,7 +473,7 @@ async function rollbackAttachmentSend(message, sender) {
   if (owned.entry.send_click_dispatched === true) return { ok: false, code: "ATTACHMENT_SEND_DISPATCHED_NO_ROLLBACK" };
 
   const next = { ...owned.entry, phase: "attachment_ready", attachment_send_rollback_at: nowIso() };
-  for (const field of ["attachment_send_committed_at", "send_marker", "baseline_message_ids", "expected_attachment_names", "send_click_dispatched", "send_click_dispatched_at"]) {
+  for (const field of ["attachment_send_committed_at", "send_marker", "baseline_message_ids", "expected_attachment_names", "send_target_fingerprint", "send_click_dispatched", "send_click_dispatched_at", "send_click_trace"]) {
     delete next[field];
   }
   return { ok: true, outbox: await putOutbox(owned.key, next) };
@@ -487,7 +488,8 @@ async function markAttachmentClickDispatched(message, sender) {
   const next = await putOutbox(owned.key, {
     ...owned.entry,
     send_click_dispatched: true,
-    send_click_dispatched_at: nowIso()
+    send_click_dispatched_at: nowIso(),
+    send_click_trace: message.send_click_trace || null
   });
   return { ok: true, outbox: next };
 }
