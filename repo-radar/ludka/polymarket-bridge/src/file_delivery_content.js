@@ -1,4 +1,4 @@
-/* global PMBConversationIdentity, PMBComposerSend, PMBChatGPTFileAttachment */
+/* global PMBConversationIdentity, PMBComposerSend, PMBChatGPTFileAttachment, PMBDeliveryPolicy */
 (() => {
   "use strict";
 
@@ -477,6 +477,7 @@
     if (!id || inFlight.has(id)) return;
     inFlight.add(id);
     try {
+      if (!PMBDeliveryPolicy.shouldProcessAttachmentPhase(entry.phase)) return;
       if (entry.phase === "claimed") await processClaimed(entry);
       else if (entry.phase === "attachment_committed") await processAttachmentCommitted(entry);
       else if (entry.phase === "attachment_ready") await processReady(entry);
@@ -484,7 +485,20 @@
     } catch (error) {
       const code = String(error?.code || "ATTACHMENT_DELIVERY_FAILED");
       if (code !== "COMPOSER_OCCUPIED") {
-        status(`Polymarket: файловая доставка остановлена безопасно — ${error.message || error} (${code}).`, "error", true);
+        const paused = await sendWorker({
+          type: "PM_PAUSE_ATTACHMENT_DELIVERY",
+          conversation_key: entry.conversation_key,
+          delivery_id: entry.delivery_id,
+          failure_code: code,
+          failure_message: String(error?.message || error)
+        }).catch(() => null);
+        status(
+          paused?.ok
+            ? `Polymarket: файловая доставка PAUSED после runtime-ошибки — ${error.message || error} (${code}). Composer больше автоматически не изменяется.`
+            : `Polymarket: runtime-ошибка и не удалось зафиксировать PAUSED — ${error.message || error} (${code}).`,
+          "error",
+          true
+        );
       }
     } finally {
       inFlight.delete(id);
@@ -498,7 +512,9 @@
       try {
         const response = await sendWorker({ type: "PM_GET_OUTBOX", conversation_key: key });
         const entry = response?.ok ? response.outbox : null;
-        if (entry?.delivery_mode === ATTACHMENT_MODE) void processEntry(entry);
+        if (entry?.delivery_mode === ATTACHMENT_MODE && PMBDeliveryPolicy.shouldProcessAttachmentPhase(entry.phase)) {
+          void processEntry(entry);
+        }
       } catch {
         // Worker may be restarting.
       }
