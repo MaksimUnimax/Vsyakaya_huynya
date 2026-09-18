@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Polymarket Bridge — ChatGPT ↔ Polymarket",
+  "version": "0.1.0",
+  "description": "Read-only research bridge from ChatGPT code-block commands to public Polymarket Gamma/CLOB/Data APIs, with bounded result delivery back into the same chat.",
+  "permissions": ["storage", "tabs"],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*",
+    "https://gamma-api.polymarket.com/*",
+    "https://clob.polymarket.com/*",
+    "https://data-api.polymarket.com/*"
+  ],
+  "background": {
+    "service_worker": "service_worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
+      "js": [
+        "product.js",
+        "conversation_identity.js",
+        "composer_send.js",
+        "protocol.js",
+        "content_script.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Polymarket Bridge",
+    "default_popup": "popup.html"
+  }
+}
