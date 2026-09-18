@@ -144,3 +144,32 @@ Verdict:
 - payload-shape/live-value inspection: **PENDING SMALLER BOUNDED COMMANDS**
 
 This is expected safe behavior, not a provider failure. Do not raise the cap merely to make the smoke payload fit. Large corpus transport remains delegated to ChatGPT Work / bounded artifact design.
+
+
+## Live smoke #5 — v0.1.1 large-result attachment PASS / automatic Send FAIL
+
+The five-command large batch was rerun under v0.1.1.
+
+Observed:
+- all 5 provider requests completed;
+- full batch became `polymarket-result-operation-ac597a20-547a-4848-bec8-2e245472f673.json`;
+- attachment appeared in ChatGPT;
+- summary text appeared;
+- enabled Send arrow was visible;
+- extension did not click Send.
+
+Verdict:
+- provider acquisition: **PASS**
+- JSON serialization: **PASS**
+- chunk/hash reconstruction: **PASS**
+- File/DataTransfer attachment: **PASS**
+- automatic Send: **FAIL**
+- v0.1.1 acceptance: **REJECTED / PATCH REQUIRED**
+
+Root cause from direct Yandex 0.1.9 comparison: incomplete copy of Send mechanics. The simplified Polymarket helper omitted the full reference target resolution, stable sampling, same-form validation, fingerprint, final validation and synchronous click trace.
+
+Corrective candidate:
+- version: `0.1.2`
+- commit: `bebd56ea282d566b063de20b9b2c58909cf09845`
+- CI job `105522558941`: **SUCCESS**
+- live rerun: **PENDING**.
