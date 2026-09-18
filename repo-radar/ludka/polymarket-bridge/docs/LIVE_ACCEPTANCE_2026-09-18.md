@@ -173,3 +173,40 @@ Corrective candidate:
 - commit: `bebd56ea282d566b063de20b9b2c58909cf09845`
 - CI job `105522558941`: **SUCCESS**
 - live rerun: **PENDING**.
+
+
+## Live smoke #6 — v0.1.3 large-result end-to-end automatic Send
+
+Owner installed exact v0.1.3 and reran the same five-command large-result batch.
+
+Observed final delivered user turn:
+- bridge version: `0.1.3`;
+- batch count: 5;
+- all 5 result envelopes: `status=OK`;
+- all 5: `request_executed=true`;
+- JSON artifact filename: `polymarket-result-operation-311313fd-147f-4f14-af95-2cc337fdd621.json`;
+- short summary and the JSON artifact arrived as one ChatGPT user turn;
+- no manual Send action was required;
+- only one delivered user turn was observed for this batch.
+
+Operations contained in the attached artifact:
+1. `book.get` — HTTP 200
+2. `price.get BUY` — HTTP 200
+3. `price.get SELL` — HTTP 200
+4. `priceHistory.get` — HTTP 200
+5. `trades.list` — HTTP 200
+
+Live verdict:
+- provider acquisition: **PASS**
+- large-result JSON serialization: **PASS**
+- IndexedDB/chunk/hash transport: **PASS**
+- ChatGPT File/DataTransfer attachment: **PASS**
+- attachment-ready gate: **PASS**
+- validated Send target: **PASS**
+- automatic Send: **PASS**
+- exactly-one delivered user turn: **PASS**
+- v0.1.3 main-path live acceptance: **PASS**
+
+This closes the manual smoke loop for the public read-only bridge.
+
+Failure-paused behavior remains permanently covered by runtime/contract gates and does not need an intentional browser fault injection before continuing the research program.
