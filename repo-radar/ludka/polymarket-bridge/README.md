@@ -1,50 +1,17 @@
 # Polymarket Bridge — ChatGPT ↔ Polymarket public APIs
 
-Version: **0.1.0**
-Status: **INITIAL READ-ONLY RESEARCH BRIDGE**
+Version: **0.1.2**
+Status: **READ-ONLY RESEARCH BRIDGE / CI PASS / LIVE AUTO-SEND ACCEPTANCE PENDING**
 
-Dedicated browser extension for the `лудка` Polymarket experiment.
-
-Reference lineage: Yandex Marketing Bridge from `MaksimUnimax/Yandex_direct`, especially its conversation binding, separate Manual sibling action, worker-owned parsing/validation, serial multi-command execution, durable outbox and ChatGPT composer delivery lifecycle.
+Reference: owner-provided **Yandex Marketing Bridge 0.1.9**.
 
 ## Purpose
 
-Let ChatGPT issue bounded Polymarket API commands in code blocks and have the browser extension:
+`ChatGPT code block -> Polymarket button -> worker -> public Polymarket API -> durable outbox -> text or JSON attachment -> validated ChatGPT Send`
 
-`ChatGPT code block -> Polymarket button -> worker -> public Polymarket API -> durable outbox -> ChatGPT composer -> Send`
+No Polymarket account or credentials are required for the current public research scope.
 
-The bridge exists for research acquisition and bounded inspection. It is **not** a trading bot in v0.1.0.
-
-## Security boundary
-
-v0.1.0 supports **public read-only operations only** and stores **no wallet private key, CLOB secret or passphrase**.
-
-Polymarket public market data is available without credentials, so credentials are not needed for the initial longshot/calibration experiment.
-
-Authenticated account reads and real order placement are intentionally deferred to a later security-reviewed phase.
-
-## Install locally
-
-1. Download/checkout this directory.
-2. Open `chrome://extensions` (or the Chromium-compatible browser's extensions page).
-3. Enable Developer mode.
-4. Choose **Load unpacked**.
-5. Select `repo-radar/ludka/polymarket-bridge/src`.
-6. Open a concrete ChatGPT conversation (`/c/<id>`).
-7. Open the extension popup and turn **Manual bridge** ON for that conversation.
-
-## Command format
-
-One command:
-
-```text
-POLYMARKET_API_V1
-{"method":"markets.list","closed":true,"limit":5}
-```
-
-Multiple commands can be placed in the same code block. They are discovered in source order and executed strictly serially.
-
-Supported v0.1.0 methods:
+## Supported operations
 
 - `markets.list`
 - `market.get`
@@ -57,12 +24,18 @@ Supported v0.1.0 methods:
 - `priceHistory.get`
 - `trades.list`
 
-See `docs/PROTOCOL.md` for exact fields.
+## Large-result delivery
 
-## Large-result rule
+Small results return as text.
 
-The bridge does not copy the withdrawn unsafe Yandex large-file design. Provider responses are capped before chat delivery. If a response is too large, use narrower pagination/time ranges and hand the complete corpus to ChatGPT Work using the experiment's canonical Work prompt.
+Large results use:
+`JSON -> IndexedDB -> ~256 KiB chunks -> per-chunk SHA-256 -> File -> DataTransfer -> attachment-ready gate -> stable validated Send target -> durable fingerprint commit -> final validation -> clickSynchronously -> new user-turn confirmation -> cleanup`.
 
-Large-data analysis belongs in:
+The v0.1.1 live defect was specifically the final Send path: attachment worked but auto-Send did not. v0.1.2 replaces the simplified helper with the Yandex 0.1.9 reference-derived target/validation/click lifecycle.
 
+## Large-data rule
+
+Attachment transport does not change the project rule: full-corpus acquisition/normalization/statistical analysis goes to ChatGPT Work.
+
+Canonical prompt:
 `../experiments/polymarket-longshot-calibration/work-prompts/POLYMARKET_FULL_CORPUS_WORK_PROMPT.md`
