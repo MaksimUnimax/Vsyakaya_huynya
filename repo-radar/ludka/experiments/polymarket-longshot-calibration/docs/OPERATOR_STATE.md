@@ -5,13 +5,16 @@ Updated: 2026-09-18
 - OWNER_HAS_POLYMARKET_ACCOUNT: **NO**
 - OWNER_HAS_POLYMARKET_CREDENTIALS: **NO**
 - AUTHENTICATED_PHASE: **NOT AVAILABLE / NOT REQUIRED**
-- POLYMARKET_BRIDGE_INSTALLED_BY_OWNER: **YES — v0.1.2**
-- V0_1_1_LIVE_STATUS: **FILE ATTACHMENT PASS / AUTOMATIC SEND FAIL**
-- V0_1_2_BUILD_STATUS: **CI PASS / INSTALLED BY OWNER / LIVE AUTO-SEND TEST PENDING**
+- CURRENT_OWNER_INSTALLED_BRIDGE: **v0.1.2 — LIVE FAIL**
+- V0_1_2_LIVE_STATUS: **FILE ATTACHMENT PASS / AUTO-SEND FAIL / RUNTIME ReferenceError / REINJECTION LOOP**
+- V0_1_3_PRE_HANDOFF_STATUS: **PASS**
+- V0_1_3_SOURCE_COMMIT: **27b1ef30b6dad348b98badf0414a93bf1d0da66e**
+- V0_1_3_CI_RUN: **35322771547**
+- V0_1_3_CI_JOB: **105528787305**
 - CURRENT_BRIDGE_SCOPE: **PUBLIC READ-ONLY**
 - CURRENT_DATA_PATH: **PUBLIC Gamma / CLOB / Data API only**
-- NEXT_REQUIRED_ACTION: **repeat the large-result five-command batch and verify automatic file Send exactly once**
+- NEXT_REQUIRED_ACTION: **owner installs exact v0.1.3 and repeats large-result file + automatic-Send live acceptance**
 
-Do not instruct the owner to obtain Polymarket credentials unless the owner explicitly says an account has been created.
+Do not request Polymarket credentials unless the owner explicitly creates an account.
 
-Historical calibration research proceeds through public endpoints.
+Historical calibration research remains public-API based.
