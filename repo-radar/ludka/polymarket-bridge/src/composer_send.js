@@ -201,7 +201,7 @@
     while (Date.now() < deadline) {
       const context = deps.resolveContext();
       const button = context ? deps.resolveButton(context) : null;
-      const target = context && button ? { context, buttn } : null;
+      const target = context && button ? { context, button } : null;
       const validation = validateTarget(target, expectedText, deps);
       if (validation.ok) {
         const candidates = typeof deps.candidateButtons === "function" ? deps.candidateButtons(context) : null;
