@@ -5,26 +5,39 @@ const root = new URL("../src/", import.meta.url);
 const read = (name) => fs.readFileSync(new URL(name, root), "utf8");
 
 const manifest = JSON.parse(read("manifest.json"));
-assert.equal(manifest.version, "0.1.2");
-assert.deepEqual(
-  manifest.content_scripts[0].js.slice(-3),
-  ["chatgpt_file_attachment.js", "content_script.js", "file_delivery_content.js"]
+assert.equal(manifest.version, "0.1.3");
+assert.ok(manifest.content_scripts[0].js.includes("delivery_policy.js"));
+assert.ok(
+  manifest.content_scripts[0].js.indexOf("delivery_policy.js") <
+  manifest.content_scripts[0].js.indexOf("file_delivery_content.js")
 );
 
 const worker = read("service_worker.js");
+assert.match(worker, /delivery_policy\.js/);
 assert.match(worker, /file_artifact_store\.js/);
 assert.match(worker, /CHAT_FILE_THRESHOLD_CHARS\s*=\s*160_000/);
 assert.match(worker, /stageTextArtifact/);
 assert.match(worker, /delivery_mode:\s*ATTACHMENT_MODE/);
+assert.match(worker, /bridge_version:\s*PMBProduct\.VERSION/);
 assert.match(worker, /PM_GET_OUTBOX_ARTIFACT_CHUNK/);
 assert.match(worker, /PM_MARK_ATTACHMENT_COMMITTED/);
 assert.match(worker, /PM_MARK_ATTACHMENT_READY/);
 assert.match(worker, /PM_COMMIT_ATTACHMENT_SEND/);
 assert.match(worker, /PM_MARK_ATTACHMENT_CLICK_DISPATCHED/);
 assert.match(worker, /PM_CONFIRM_ATTACHMENT_SEND/);
+assert.match(worker, /PM_PAUSE_ATTACHMENT_DELIVERY/);
+assert.match(worker, /pauseLegacyAttachmentOutboxesForCurrentVersion/);
+assert.match(worker, /STALE_OUTBOX_VERSION/);
+assert.match(worker, /failed_paused/);
 assert.match(worker, /send_target_fingerprint/);
 assert.match(worker, /send_click_trace/);
 assert.doesNotMatch(worker, /DELIVERY_TOO_LARGE/);
+
+const policy = read("delivery_policy.js");
+assert.match(policy, /attachment_failed_paused/);
+assert.match(policy, /shouldProcessAttachmentPhase/);
+assert.match(policy, /needsVersionPause/);
+assert.match(policy, /pauseEntry/);
 
 const store = read("file_artifact_store.js");
 assert.match(store, /indexedDB\.open/);
@@ -44,11 +57,14 @@ assert.match(composer, /function sendCandidates/);
 assert.match(composer, /function targetFingerprint/);
 assert.match(composer, /function validateTarget/);
 assert.match(composer, /async function waitForValidatedTarget/);
+assert.match(composer, /const target = context && button \? \{ context, button \} : null;/);
 assert.match(composer, /function clickSynchronously/);
 assert.match(composer, /BUTTON_COMPOSER_FORM_MISMATCH/);
 assert.match(composer, /ATTACHMENT_NOT_READY/);
+assert.doesNotMatch(composer, /\bbuttn\b/);
 
 const content = read("file_delivery_content.js");
+assert.match(content, /PMBDeliveryPolicy/);
 assert.match(content, /PM_GET_OUTBOX_ARTIFACT_CHUNK/);
 assert.match(content, /ATTACHMENT_CHUNK_SHA256_MISMATCH/);
 assert.match(content, /PMBChatGPTFileAttachment\.setInputFiles/);
@@ -58,10 +74,11 @@ assert.match(content, /PMBComposerSend\.validateTarget/);
 assert.match(content, /PMBComposerSend\.clickSynchronously/);
 assert.match(content, /PMBComposerSend\.targetFingerprint/);
 assert.match(content, /PM_COMMIT_ATTACHMENT_SEND/);
-assert.match(content, /send_target_fingerprint/);
 assert.match(content, /PM_MARK_ATTACHMENT_CLICK_DISPATCHED/);
-assert.match(content, /send_click_trace/);
 assert.match(content, /PM_CONFIRM_ATTACHMENT_SEND/);
+assert.match(content, /PM_PAUSE_ATTACHMENT_DELIVERY/);
+assert.match(content, /shouldProcessAttachmentPhase/);
+assert.match(content, /Composer больше автоматически не изменяется/);
 assert.match(content, /Автоматический повтор Send запрещён/);
 assert.doesNotMatch(content, /async function waitForSendButton/);
 
