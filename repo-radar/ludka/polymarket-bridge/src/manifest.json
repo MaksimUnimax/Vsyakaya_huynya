@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Polymarket Bridge — ChatGPT ↔ Polymarket",
-  "version": "0.1.1",
-  "description": "Read-only research bridge from ChatGPT code-block commands to public Polymarket Gamma/CLOB/Data APIs, with bounded text delivery and chunked JSON file attachment delivery for large results.",
+  "version": "0.1.2",
+  "description": "Read-only research bridge from ChatGPT code-block commands to public Polymarket Gamma/CLOB/Data APIs, with bounded text delivery and reference-derived chunked JSON file attachment + validated Send delivery for large results.",
   "permissions": [
     "storage",
     "tabs"
