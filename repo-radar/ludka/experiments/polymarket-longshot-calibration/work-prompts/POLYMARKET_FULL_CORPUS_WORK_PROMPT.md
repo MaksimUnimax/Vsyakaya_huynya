@@ -100,6 +100,38 @@ Do not tune these after seeing the result:
 - H4: effects may differ materially by category and time-to-resolution.
 - H5: statistical calibration edge may disappear after executable pricing and fill selection.
 
+## RESOURCE-BUDGET PREFLIGHT GATE — OWNER APPROVAL REQUIRED FOR LARGE VOLUME
+
+Before starting any acquisition or analysis lane that may be materially large, Work MUST first estimate resource scale and return that estimate to Main Chat/owner.
+
+Trigger this gate if ANY of the following is plausibly true:
+- hundreds of thousands or millions of entities/markets/rows;
+- tens of thousands or more provider/API requests;
+- multi-gigabyte raw or normalized data;
+- long-running acquisition likely to take hours;
+- large local/Work storage growth;
+- expensive repeated pagination across many partitions;
+- any step where full-corpus execution could materially consume limited Work/runtime/storage/API resources.
+
+Before proceeding, Work must report:
+1. estimated entity/market count;
+2. estimated request count;
+3. estimated raw bytes / GiB;
+4. estimated normalized rows and storage;
+5. expected runtime order of magnitude;
+6. pagination/partition strategy;
+7. what subset of the data is actually necessary for the current frozen hypotheses;
+8. lower-cost complete-corpus alternatives, if any, such as metadata-first eligibility filtering;
+9. which data can be deferred to a later Work pass without weakening the current analysis.
+
+After this preflight, Work MUST STOP and wait for explicit Main Chat/owner approval before starting the high-volume lane.
+
+NO HIGH-VOLUME ACQUISITION MAY START AUTOMATICALLY.
+
+If the scope expands materially during execution beyond the approved estimate (for example >2x entities, requests, storage or runtime), Work MUST pause again and return a revised estimate for approval.
+
+This rule does NOT permit sampling as a substitute for the approved corpus. It requires scope control and staged architecture before expensive acquisition.
+
 ## Required acquisition
 
 Use the current official Polymarket public APIs and/or bounded data artifacts produced by the Polymarket Bridge. Public data does not require credentials.
