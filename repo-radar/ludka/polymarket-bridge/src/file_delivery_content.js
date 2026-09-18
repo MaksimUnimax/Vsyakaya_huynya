@@ -472,7 +472,7 @@
     }
   }
 
-  async function processEntry(entry) {  async function processEntry(entry) {
+  async function processEntry(entry) {
     const id = String(entry?.delivery_id || "");
     if (!id || inFlight.has(id)) return;
     inFlight.add(id);
