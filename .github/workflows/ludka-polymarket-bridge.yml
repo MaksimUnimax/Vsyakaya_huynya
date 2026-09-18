@@ -25,6 +25,11 @@ jobs:
           node --check repo-radar/ludka/polymarket-bridge/src/service_worker.js
           node --check repo-radar/ludka/polymarket-bridge/src/content_script.js
           node --check repo-radar/ludka/polymarket-bridge/src/popup.js
+          node --check repo-radar/ludka/polymarket-bridge/src/file_artifact_store.js
+          node --check repo-radar/ludka/polymarket-bridge/src/chatgpt_file_attachment.js
+          node --check repo-radar/ludka/polymarket-bridge/src/file_delivery_content.js
           node -e 'JSON.parse(require("fs").readFileSync("repo-radar/ludka/polymarket-bridge/src/manifest.json","utf8")); console.log("manifest: PASS")'
       - name: Protocol tests
         run: node repo-radar/ludka/polymarket-bridge/tests/protocol.test.mjs
+      - name: File-delivery contract tests
+        run: node repo-radar/ludka/polymarket-bridge/tests/file_delivery_contract.test.mjs
