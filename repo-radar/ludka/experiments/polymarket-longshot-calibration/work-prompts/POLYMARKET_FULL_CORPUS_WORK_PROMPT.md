@@ -172,3 +172,20 @@ The final report must distinguish:
 Do not use phrases like `working strategy` unless execution has actually been demonstrated. A statistically significant calibration bias is only a candidate market inefficiency until transaction/execution layers survive.
 
 Return exact file paths, row counts, hashes, exclusions and a concise result summary. Do not dump the full corpus into chat.
+
+
+## LIVE QUOTE-SEMANTICS HARD GATE
+
+Accepted v0.1.3 live evidence established for one YES token:
+- `book.get` best bid = 0.037;
+- `book.get` best ask = 0.038;
+- `price.get side=BUY` = 0.037;
+- `price.get side=SELL` = 0.038.
+
+Therefore:
+
+1. DO NOT infer executable buy/sell economics from the literal `side=BUY/SELL` label alone.
+2. Before any execution/PnL calculation, reconcile the price endpoint semantics against the corresponding order-book best bid/best ask on bounded live samples.
+3. Preserve both raw endpoint side labels and independently derived book-side labels.
+4. If endpoint-side semantics cannot be proven stable, use explicit order-book bid/ask for execution modeling and mark the price endpoint as descriptive only.
+5. Never silently swap or reinterpret sides to make results look coherent.
