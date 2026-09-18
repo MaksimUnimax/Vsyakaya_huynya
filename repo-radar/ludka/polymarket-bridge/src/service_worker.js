@@ -1,10 +1,11 @@
 "use strict";
 
-importScripts("product.js", "conversation_identity.js", "protocol.js", "file_artifact_store.js");
+importScripts("product.js", "conversation_identity.js", "protocol.js", "delivery_policy.js", "file_artifact_store.js");
 
 const Protocol = globalThis.PolymarketBridgeProtocol;
 const Identity = globalThis.PMBConversationIdentity;
 const ArtifactStore = globalThis.PMBFileArtifactStore;
+const DeliveryPolicy = globalThis.PMBDeliveryPolicy;
 
 const KEYS = Object.freeze({
   MANUAL: "pmb_manual_modes_v1",
@@ -103,6 +104,65 @@ async function clearOperation(conversationKey, operationId = null) {
   const map = await getMap(KEYS.OPERATIONS);
   if (!operationId || map[key]?.operation_id === operationId) delete map[key];
   await setMap(KEYS.OPERATIONS, map);
+}
+
+async function pauseAttachmentDelivery(conversationKey, entry, { code, message } = {}) {
+  const key = normalizeKey(conversationKey);
+  if (!entry || entry.delivery_mode !== ATTACHMENT_MODE) {
+    return { ok: false, code: "ATTACHMENT_MODE_REQUIRED" };
+  }
+  const paused = DeliveryPolicy.pauseEntry(entry, {
+    code,
+    message,
+    currentVersion: PMBProduct.VERSION,
+    nowIso: nowIso()
+  });
+  const saved = await putOutbox(key, paused);
+  if (saved.operation_id) {
+    await putOperation(key, {
+      operation_id: saved.operation_id,
+      status: "failed_paused",
+      count: Number(saved.provider_result_count || 0),
+      tab_id: saved.tab_id,
+      delivery_id: saved.delivery_id,
+      delivery_mode: saved.delivery_mode,
+      failure_code: saved.failed_code,
+      created_at: saved.created_at || nowIso()
+    });
+  }
+  return { ok: true, outbox: saved };
+}
+
+async function pauseLegacyAttachmentOutboxesForCurrentVersion() {
+  const outboxMap = await getMap(KEYS.OUTBOX);
+  const operationMap = await getMap(KEYS.OPERATIONS);
+  let outboxChanged = false;
+  let operationChanged = false;
+
+  for (const [key, entry] of Object.entries(outboxMap)) {
+    if (!DeliveryPolicy.needsVersionPause(entry, PMBProduct.VERSION)) continue;
+    const paused = DeliveryPolicy.pauseEntry(entry, {
+      code: "STALE_OUTBOX_VERSION",
+      message: `Незавершённая файловая доставка создана другой версией bridge (${entry?.bridge_version || "unknown"}); новая версия не имеет права автоматически переиспользовать этот draft.`,
+      currentVersion: PMBProduct.VERSION,
+      nowIso: nowIso()
+    });
+    outboxMap[key] = paused;
+    outboxChanged = true;
+
+    if (paused.operation_id && operationMap[key]?.operation_id === paused.operation_id) {
+      operationMap[key] = {
+        ...operationMap[key],
+        status: "failed_paused",
+        failure_code: "STALE_OUTBOX_VERSION",
+        updated_at: nowIso()
+      };
+      operationChanged = true;
+    }
+  }
+
+  if (outboxChanged) await setMap(KEYS.OUTBOX, outboxMap);
+  if (operationChanged) await setMap(KEYS.OPERATIONS, operationMap);
 }
 
 function senderConversationKey(sender) {
@@ -249,6 +309,7 @@ async function buildDelivery({ key, senderTabId, operationId, envelopes }) {
       tab_id: senderTabId,
       phase: "claimed",
       delivery_mode: "text",
+      bridge_version: PMBProduct.VERSION,
       report_text: textReport,
       created_at: nowIso()
     };
@@ -271,6 +332,7 @@ async function buildDelivery({ key, senderTabId, operationId, envelopes }) {
     tab_id: senderTabId,
     phase: "claimed",
     delivery_mode: ATTACHMENT_MODE,
+    bridge_version: PMBProduct.VERSION,
     report_text: shortAttachmentReport(filename, envelopes),
     artifact_descriptors: [descriptor],
     expected_attachment_names: [filename],
@@ -284,8 +346,19 @@ async function executeBlock(conversationKey, blockText, sender) {
   const fence = ownerFence(key, sender);
   if (fence) return fence;
   if (!(await getManual(key))) return { ok: false, code: "MANUAL_OFF", error: "Manual bridge выключен для этого диалога." };
-  if (await getOutbox(key)) return { ok: false, code: "DELIVERY_IN_PROGRESS", error: "Сначала завершите текущую доставку." };
-  if (await getOperation(key)) return { ok: false, code: "OPERATION_IN_PROGRESS", error: "Для этого диалога уже выполняется операция." };
+  const existingOutbox = await getOutbox(key);
+  if (DeliveryPolicy.isPausedFailure(existingOutbox)) {
+    await clearOutbox(key, existingOutbox.delivery_id);
+    if (existingOutbox.operation_id) await clearOperation(key, existingOutbox.operation_id);
+  } else if (existingOutbox) {
+    return { ok: false, code: "DELIVERY_IN_PROGRESS", error: "Сначала завершите текущую доставку." };
+  }
+  const existingOperation = await getOperation(key);
+  if (existingOperation?.status === "failed_paused") {
+    await clearOperation(key, existingOperation.operation_id);
+  } else if (existingOperation) {
+    return { ok: false, code: "OPERATION_IN_PROGRESS", error: "Для этого диалога уже выполняется операция." };
+  }
 
   const discovered = Protocol.discover(blockText);
   if (discovered.length === 0) {
@@ -303,6 +376,7 @@ async function executeBlock(conversationKey, blockText, sender) {
       tab_id: sender.tab.id,
       phase: "claimed",
       delivery_mode: "text",
+      bridge_version: PMBProduct.VERSION,
       report_text: report,
       created_at: nowIso()
     });
@@ -573,6 +647,19 @@ async function handleMessage(message, sender) {
     return { ok: true };
   }
 
+  if (type === "PM_PAUSE_ATTACHMENT_DELIVERY") {
+    const key = normalizeKey(message.conversation_key);
+    const fence = ownerFence(key, sender);
+    if (fence) return fence;
+    const entry = await getOutbox(key);
+    if (!entry || entry.delivery_id !== String(message.delivery_id || "")) return { ok: false, code: "DELIVERY_NOT_FOUND" };
+    if (DeliveryPolicy.isPausedFailure(entry)) return { ok: true, already_paused: true, outbox: entry };
+    return pauseAttachmentDelivery(key, entry, {
+      code: message.failure_code || "ATTACHMENT_RUNTIME_FAILED",
+      message: message.failure_message || "Attachment runtime failed."
+    });
+  }
+
   if (type === "PM_GET_OUTBOX_ARTIFACT_CHUNK") return attachmentChunk(message, sender);
   if (type === "PM_MARK_ATTACHMENT_COMMITTED") return markAttachmentCommitted(message, sender);
   if (type === "PM_MARK_ATTACHMENT_READY") return markAttachmentReady(message, sender);
@@ -585,6 +672,7 @@ async function handleMessage(message, sender) {
 }
 
 void ArtifactStore.cleanupExpired().catch(() => null);
+void pauseLegacyAttachmentOutboxesForCurrentVersion().catch(() => null);
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   Promise.resolve(handleMessage(message, sender))
