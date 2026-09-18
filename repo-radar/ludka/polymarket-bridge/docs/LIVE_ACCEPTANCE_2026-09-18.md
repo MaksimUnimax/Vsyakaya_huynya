@@ -112,3 +112,35 @@ Research consequence:
 - the experiment must preserve fee metadata per market;
 - no single global fee assumption is allowed for executable-PnL analysis;
 - historical calibration analysis remains fee-independent, but taker/maker simulations must use contemporaneous/source-supported fee rules or explicitly mark fee reconstruction as unavailable.
+
+
+## Live smoke #4 — five public endpoints + delivery-size fence
+
+One block executed five valid public commands against one live YES token / condition:
+
+1. `book.get`
+2. `price.get BUY`
+3. `price.get SELL`
+4. `priceHistory.get`
+5. `trades.list`
+
+Observed combined delivery:
+- all five provider executions: `status=OK`
+- all five: HTTP 200
+- all five: `request_executed=true`
+- combined serialized result size: 282321 chars
+- bridge delivery cap: 200000 chars
+- bridge returned controlled `POLYMARKET_ERROR_V1`
+- code: `DELIVERY_TOO_LARGE`
+- no attempt was made to inject the oversized provider payload into ChatGPT.
+
+Verdict:
+- current book endpoint transport: **PASS**
+- executable BUY quote endpoint transport: **PASS**
+- executable SELL quote endpoint transport: **PASS**
+- recent historical-price endpoint transport: **PASS**
+- public trades endpoint transport: **PASS**
+- oversized combined-result safety fence: **PASS**
+- payload-shape/live-value inspection: **PENDING SMALLER BOUNDED COMMANDS**
+
+This is expected safe behavior, not a provider failure. Do not raise the cap merely to make the smoke payload fit. Large corpus transport remains delegated to ChatGPT Work / bounded artifact design.
