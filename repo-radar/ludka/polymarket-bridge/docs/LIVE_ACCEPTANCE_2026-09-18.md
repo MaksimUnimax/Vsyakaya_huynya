@@ -79,3 +79,36 @@ A resolved-market corpus cannot assume uniform price-history retention back to P
 - historical trade series available.
 
 Missing historical price data must never be imputed as zero or treated as a no-trade observation.
+
+
+## Live smoke #3 — invalid command isolation + live market discovery
+
+One code block contained:
+
+1. unsupported method `this.method.does.not.exist`;
+2. `markets.list closed=false limit=1`.
+
+Observed:
+- batch count: 2;
+- item 1: `ERROR`, `request_executed=false`, HTTP 0, code `UNSUPPORTED_METHOD`;
+- item 2: `OK`, `request_executed=true`, HTTP 200;
+- valid command continued after the invalid command;
+- returned market id `559651` with live CLOB token ids.
+
+Verdict:
+- pre-provider validation for invalid command: **PASS**
+- zero provider request for invalid command: **PASS**
+- malformed/unsupported item does not consume later valid item: **PASS**
+- public current-market discovery: **PASS**
+
+## Fee-metadata finding
+
+The returned live market advertises market-specific fee metadata:
+- `feesEnabled=true`
+- a named `feeType`
+- a structured `feeSchedule`.
+
+Research consequence:
+- the experiment must preserve fee metadata per market;
+- no single global fee assumption is allowed for executable-PnL analysis;
+- historical calibration analysis remains fee-independent, but taker/maker simulations must use contemporaneous/source-supported fee rules or explicitly mark fee reconstruction as unavailable.
