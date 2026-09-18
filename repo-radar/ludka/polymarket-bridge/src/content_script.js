@@ -313,6 +313,7 @@
       const response = await sendWorker({ type: "PM_GET_OUTBOX", conversation_key: key });
       const entry = response?.ok ? response.outbox : null;
       if (!entry?.delivery_id) return;
+      if (entry.delivery_mode === "attachment_v1") return; // file_delivery_content.js owns attachment delivery.
       const local = deliveryState.get(entry.delivery_id) || { injected: false, clicked: false, completed: false, ready_since: 0 };
       deliveryState.set(entry.delivery_id, local);
 
