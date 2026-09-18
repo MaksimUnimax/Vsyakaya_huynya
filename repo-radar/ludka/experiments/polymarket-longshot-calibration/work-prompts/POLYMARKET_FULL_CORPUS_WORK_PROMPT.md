@@ -33,7 +33,7 @@ Work MUST NOT:
 Work MUST:
 1. execute the complete bounded large-data task defined below;
 2. preserve provenance, hashes, row counts, exclusions and failures;
-3. write required artifacts;
+3. generate the required artifacts in Work's own environment and return them as downloadable chat artifacts;
 4. report findings and unresolved issues back to Main Chat;
 5. stop after the bounded assignment is complete.
 
