@@ -156,8 +156,22 @@
     return nodes;
   }
 
+  function turnSurfaceText(node) {
+    if (!(node instanceof Element)) return "";
+    const root = node.closest('[data-testid^="conversation-turn-"], [data-message-id]') || node;
+    const parts = [root.textContent || "", root.getAttribute("aria-label") || "", root.getAttribute("title") || ""];
+    for (const item of root.querySelectorAll('[aria-label], [title]')) {
+      parts.push(item.getAttribute("aria-label") || "", item.getAttribute("title") || "");
+    }
+    return PMBComposerSend.normalize(parts.join(" "));
+  }
+
   function userTurnId(node, index) {
-    return String(node?.getAttribute?.("data-message-id") || node?.getAttribute?.("data-testid") || node?.id || `user-${index}-${String(node?.textContent || "").slice(0, 80)}`);
+    if (!(node instanceof Element)) return `missing:${index}`;
+    const root = node.closest('[data-testid^="conversation-turn-"], [data-message-id]') || node;
+    const explicit = root.getAttribute("data-message-id") || root.getAttribute("data-testid") || root.id ||
+      node.getAttribute("data-message-id") || node.getAttribute("data-testid") || node.id;
+    return explicit ? `id:${explicit}` : `fallback:${index}:${turnSurfaceText(root).slice(0,1600)}`;
   }
 
   function captureUserTurnIds() {
@@ -166,44 +180,191 @@
 
   function matchingNewUserTurn(entry) {
     const baseline = new Set(Array.isArray(entry.baseline_message_ids) ? entry.baseline_message_ids.map(String) : []);
-    const marker = String(entry.send_marker || entry.report_text || "").trim();
-    const filenames = (entry.expected_attachment_names || entry.artifact_descriptors?.map((item) => item.filename) || []).map(String).filter(Boolean);
+    const marker = PMBComposerSend.normalize(entry.send_marker || entry.report_text || "");
+    const filenames = (entry.expected_attachment_names || entry.artifact_descriptors?.map((item) => item.filename) || [])
+      .map(String).filter(Boolean);
 
     const turns = userTurns();
     for (let index = 0; index < turns.length; index += 1) {
       const node = turns[index];
       const id = userTurnId(node, index);
       if (baseline.has(id)) continue;
-      const surface = String(node.textContent || "") + " " + String(node.getAttribute?.("aria-label") || "");
-      const markerMatches = !marker || surface.includes(marker);
-      const fileMatches = filenames.length === 0 || filenames.some((filename) => surface.includes(filename));
-      if (markerMatches || fileMatches) return { id, node };
+      const surface = turnSurfaceText(node);
+      if (marker && !surface.includes(marker)) continue;
+      if (filenames.some((filename) => !surface.includes(filename))) continue;
+      return { id, node };
     }
     return null;
   }
 
-  async function waitForSendButton(entry) {
-    const deadline = Date.now() + SEND_TARGET_TIMEOUT_MS;
-    let stable = null;
-    let stableCount = 0;
-
+  async function waitForMatchingNewUserTurn(entry, timeoutMs) {
+    const deadline = Date.now() + timeoutMs;
     while (Date.now() < deadline) {
       assertEntry(entry);
-      const button = PMBComposerSend.findSendButton(document);
-      if (button && !button.disabled) {
-        if (button === stable) stableCount += 1;
-        else { stable = button; stableCount = 1; }
-        if (stableCount >= 3) return button;
-      } else {
-        stable = null;
-        stableCount = 0;
-      }
-      await sleep(120);
+      const match = matchingNewUserTurn(entry);
+      if (match) return match;
+      await sleep(250);
     }
     return null;
   }
 
-  async function processClaimed(entry) {
+  function sendDeps(entry, descriptors, profile = null) {
+    return {
+      resolveContext: () => PMBComposerSend.resolveContext(document),
+      resolveButton: () => PMBComposerSend.findSendButton(document, profile),
+      candidateButtons: (context) => PMBComposerSend.sendCandidates(context?.form || document, profile),
+      visible: PMBComposerSend.visible,
+      disabled: PMBComposerSend.disabled,
+      readComposerText: PMBComposerSend.readComposer,
+      fingerprint: PMBComposerSend.targetFingerprint,
+      requireAttachmentReady: () => PMBChatGPTFileAttachment.attachmentReady(descriptors, document),
+      sendBlockedReason: (button) => {
+        const text = `${button?.getAttribute?.("aria-label") || ""} ${button?.getAttribute?.("title") || ""}`;
+        return /(?:uploading|processing|preparing|загруз|обработ|подготов)/i.test(text) ? "SEND_BLOCKED_BY_UPLOAD" : "";
+      },
+      sleep
+    };
+  }
+
+  async function rollbackSendBeforeClick(entry, reason) {
+    const response = await sendWorker({
+      type: "PM_ROLLBACK_ATTACHMENT_SEND",
+      conversation_key: entry.conversation_key,
+      delivery_id: entry.delivery_id,
+      reason: String(reason || "pre_click_validation_failed")
+    });
+    if (!response?.ok) {
+      throw Object.assign(new Error(response?.code || "Send rollback failed."), {
+        code: response?.code || "ATTACHMENT_SEND_ROLLBACK_FAILED"
+      });
+    }
+    return response;
+  }
+
+  async function commitAndClick(entry, stableTarget = null) {
+    const descriptors = Array.isArray(entry.artifact_descriptors) ? entry.artifact_descriptors : [];
+    const expectedText = String(entry.report_text || "").trim();
+    const deps = sendDeps(entry, descriptors, null);
+
+    const target = stableTarget || await PMBComposerSend.waitForValidatedTarget({
+      expectedText,
+      timeoutMs: SEND_TARGET_TIMEOUT_MS,
+      sampleIntervalMs: 120,
+      requiredStableSamples: 3,
+      deps
+    });
+    if (!target) {
+      status("Polymarket: стабильная готовая кнопка Send не подтверждена. Ничего не отправлено.", "error");
+      return;
+    }
+
+    assertEntry(entry);
+    const baseline = captureUserTurnIds();
+    const expectedNames = descriptors.map((item) => String(item.filename));
+    const commit = await sendWorker({
+      type: "PM_COMMIT_ATTACHMENT_SEND",
+      conversation_key: entry.conversation_key,
+      delivery_id: entry.delivery_id,
+      send_marker: expectedText,
+      baseline_message_ids: baseline,
+      expected_attachment_names: expectedNames,
+      send_target_fingerprint: target.snapshot?.button_fingerprint || PMBComposerSend.targetFingerprint(target.button)
+    });
+    if (!commit?.ok) {
+      throw Object.assign(new Error(commit?.error || commit?.code || "Send commit failed."), {
+        code: commit?.code || "ATTACHMENT_SEND_COMMIT_FAILED"
+      });
+    }
+
+    let durable = { ...(commit.outbox || entry), phase: SEND_COMMITTED_PHASE };
+    if (commit.already_committed) {
+      const match = matchingNewUserTurn(durable);
+      if (match) {
+        await sendWorker({
+          type: "PM_CONFIRM_ATTACHMENT_SEND",
+          conversation_key: durable.conversation_key,
+          delivery_id: durable.delivery_id,
+          confirmation_message_id: match.id
+        });
+      }
+      return;
+    }
+
+    const alreadySent = matchingNewUserTurn(durable);
+    if (alreadySent) {
+      await sendWorker({
+        type: "PM_CONFIRM_ATTACHMENT_SEND",
+        conversation_key: durable.conversation_key,
+        delivery_id: durable.delivery_id,
+        confirmation_message_id: alreadySent.id
+      });
+      return;
+    }
+
+    assertEntry(durable);
+    const freshContext = deps.resolveContext();
+    const freshButton = freshContext ? deps.resolveButton(freshContext) : null;
+    const freshTarget = freshContext && freshButton ? { context: freshContext, button: freshButton } : null;
+    const finalValidation = PMBComposerSend.validateTarget(freshTarget, expectedText, deps);
+
+    if (!finalValidation.ok) {
+      await rollbackSendBeforeClick(durable, finalValidation.code);
+      status(`Polymarket: Send изменился до клика (${finalValidation.code}). Клика не было; разрешена новая безопасная проверка.`, "error");
+      return;
+    }
+
+    if (!PMBChatGPTFileAttachment.attachmentReady(descriptors, document)) {
+      await rollbackSendBeforeClick(durable, "ATTACHMENT_NOT_READY_PRE_CLICK");
+      status("Polymarket: вложение перестало быть готовым до клика. Клика не было.", "error", true);
+      return;
+    }
+
+    let clickResult;
+    let methodCalled = false;
+    try {
+      clickResult = PMBComposerSend.clickSynchronously({
+        target: freshTarget,
+        expectedText,
+        deps
+      });
+      methodCalled = clickResult?.method_called === true;
+    } catch (error) {
+      methodCalled = error?.method_called === true;
+      if (!methodCalled) {
+        await rollbackSendBeforeClick(durable, error?.code || "PRE_CLICK_FAILURE");
+        throw error;
+      }
+      status("Polymarket: вызов Send уже произошёл, но исход не подтверждён. Повторный Send запрещён; идёт только сверка чата.", "error", true);
+    }
+
+    if (methodCalled) {
+      const ack = await sendWorker({
+        type: "PM_MARK_ATTACHMENT_CLICK_DISPATCHED",
+        conversation_key: durable.conversation_key,
+        delivery_id: durable.delivery_id,
+        send_click_trace: clickResult?.trace || null
+      }).catch(() => null);
+      if (ack?.outbox) durable = { ...ack.outbox, phase: SEND_COMMITTED_PHASE };
+    }
+
+    const match = await waitForMatchingNewUserTurn(durable, SEND_CONFIRM_TIMEOUT_MS);
+    if (match) {
+      const confirmed = await sendWorker({
+        type: "PM_CONFIRM_ATTACHMENT_SEND",
+        conversation_key: durable.conversation_key,
+        delivery_id: durable.delivery_id,
+        confirmation_message_id: match.id
+      });
+      if (confirmed?.ok) {
+        status("Polymarket: файловая доставка подтверждена; временный артефакт очищен.", "ok");
+        return;
+      }
+    }
+
+    status("Polymarket: Send был вызван, но новый user-turn не подтверждён за 120 секунд. Автоматический повтор Send запрещён; состояние сохранено.", "error", true);
+  }
+
+  async function processClaimed(entry) {  async function processClaimed(entry) {
     assertEntry(entry);
     composerFor(entry);
 
@@ -269,96 +430,49 @@
     assertEntry(entry);
     const descriptors = Array.isArray(entry.artifact_descriptors) ? entry.artifact_descriptors : [];
     if (!PMBChatGPTFileAttachment.attachmentReady(descriptors, document)) {
-      throw Object.assign(new Error("Вложение перестало быть готовым; Send запрещён."), { code: "ATTACHMENT_NOT_READY_PRE_SEND" });
+      throw Object.assign(new Error("Вложение больше не подтверждается в ChatGPT. Автоповтор прикрепления запрещён."), {
+        code: "ATTACHMENT_NOT_READY_NO_RETRY"
+      });
     }
 
     composerFor(entry);
-    const button = await waitForSendButton(entry);
-    if (!button) {
-      status("Polymarket: стабильная кнопка Send пока не подтверждена.", "error");
-      return;
-    }
-
-    const baseline = captureUserTurnIds();
-    const expectedNames = descriptors.map((item) => String(item.filename));
-    const commit = await sendWorker({
-      type: "PM_COMMIT_ATTACHMENT_SEND",
-      conversation_key: entry.conversation_key,
-      delivery_id: entry.delivery_id,
-      send_marker: String(entry.report_text || ""),
-      baseline_message_ids: baseline,
-      expected_attachment_names: expectedNames
+    const expectedText = String(entry.report_text || "").trim();
+    const deps = sendDeps(entry, descriptors, null);
+    const target = await PMBComposerSend.waitForValidatedTarget({
+      expectedText,
+      timeoutMs: SEND_TARGET_TIMEOUT_MS,
+      sampleIntervalMs: 120,
+      requiredStableSamples: 3,
+      deps
     });
-    if (!commit?.ok) throw Object.assign(new Error(commit?.error || commit?.code || "Send commit failed."), { code: commit?.code || "ATTACHMENT_SEND_COMMIT_FAILED" });
-    if (commit.already_committed) return;
 
-    assertEntry(entry);
-    if (!PMBChatGPTFileAttachment.attachmentReady(descriptors, document)) {
-      await sendWorker({
-        type: "PM_ROLLBACK_ATTACHMENT_SEND",
-        conversation_key: entry.conversation_key,
-        delivery_id: entry.delivery_id
-      }).catch(() => null);
-      throw Object.assign(new Error("Вложение перестало быть готовым до клика; клика не было."), { code: "ATTACHMENT_NOT_READY_PRE_CLICK" });
-    }
-
-    const freshButton = PMBComposerSend.findSendButton(document);
-    if (!freshButton || freshButton !== button || freshButton.disabled) {
-      await sendWorker({
-        type: "PM_ROLLBACK_ATTACHMENT_SEND",
-        conversation_key: entry.conversation_key,
-        delivery_id: entry.delivery_id
-      }).catch(() => null);
-      status("Polymarket: Send изменился до клика; клика не было, состояние безопасно откатилось.", "error");
+    if (!target) {
+      status("Polymarket: стабильная готовая кнопка Send пока не подтверждена.", "error");
       return;
     }
 
-    freshButton.click();
-
-    await sendWorker({
-      type: "PM_MARK_ATTACHMENT_CLICK_DISPATCHED",
-      conversation_key: entry.conversation_key,
-      delivery_id: entry.delivery_id
-    }).catch(() => null);
-
-    status("Polymarket: Send вызван один раз; повтор запрещён, жду подтверждения сообщения.", "info", true);
-
-    const durable = { ...(commit.outbox || entry), phase: SEND_COMMITTED_PHASE, send_click_dispatched: true };
-    const deadline = Date.now() + SEND_CONFIRM_TIMEOUT_MS;
-    while (Date.now() < deadline) {
-      const match = matchingNewUserTurn(durable);
-      if (match) {
-        const confirmed = await sendWorker({
-          type: "PM_CONFIRM_ATTACHMENT_SEND",
-          conversation_key: durable.conversation_key,
-          delivery_id: durable.delivery_id,
-          confirmation_message_id: match.id
-        });
-        if (confirmed?.ok) {
-          status("Polymarket: файловая доставка подтверждена; временный артефакт очищен.", "ok");
-          return;
-        }
-      }
-      await sleep(500);
-    }
-
-    status("Polymarket: Send был вызван, но новый user-turn пока не подтверждён. Автоматический повтор Send запрещён; состояние сохранено.", "error", true);
+    await commitAndClick(entry, target);
   }
 
   async function processSendCommitted(entry) {
     assertEntry(entry);
     const match = matchingNewUserTurn(entry);
-    if (!match) return;
+    if (!match) {
+      status("Polymarket: попытка Send уже зафиксирована. Подтверждения нового сообщения пока нет; автоматический повтор Send запрещён.", "error", true);
+      return;
+    }
     const confirmed = await sendWorker({
       type: "PM_CONFIRM_ATTACHMENT_SEND",
       conversation_key: entry.conversation_key,
       delivery_id: entry.delivery_id,
       confirmation_message_id: match.id
     });
-    if (confirmed?.ok) status("Polymarket: файловая доставка подтверждена после восстановления; артефакт очищен.", "ok");
+    if (confirmed?.ok) {
+      status("Polymarket: файловая доставка подтверждена после восстановления; артефакт очищен.", "ok");
+    }
   }
 
-  async function processEntry(entry) {
+  async function processEntry(entry) {  async function processEntry(entry) {
     const id = String(entry?.delivery_id || "");
     if (!id || inFlight.has(id)) return;
     inFlight.add(id);
