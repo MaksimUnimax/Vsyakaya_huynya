@@ -364,7 +364,7 @@
     status("Polymarket: Send был вызван, но новый user-turn не подтверждён за 120 секунд. Автоматический повтор Send запрещён; состояние сохранено.", "error", true);
   }
 
-  async function processClaimed(entry) {  async function processClaimed(entry) {
+  async function processClaimed(entry) {
     assertEntry(entry);
     composerFor(entry);
 
