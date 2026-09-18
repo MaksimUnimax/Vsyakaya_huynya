@@ -2,48 +2,73 @@
 
 Date: 2026-09-18
 
-Current developer version: **0.1.0**
+Current developer version: **0.1.1**
 
-Scope: **public read-only research bridge**.
+Scope: **public read-only research bridge + bounded text/file delivery**.
 
-## Accepted in this developer checkpoint
+## Reference
 
-- Manifest V3 parses.
-- JavaScript syntax checks pass for protocol, service worker, content script and popup.
-- Protocol unit tests pass.
-- Command discovery supports multiple `POLYMARKET_API_V1` commands in one code block and preserves later commands after an earlier invalid command.
-- Worker executes commands serially.
-- Conversation owner/tab fences and a durable outbox are present.
-- ChatGPT result delivery uses inject -> commit -> one Send -> ready-state completion.
-- Provider/chat payload caps are present.
-- No wallet private key, CLOB secret/passphrase or write/trading endpoint is present.
+Owner-provided factual file-delivery reference:
 
-## Local exact dev ZIP
-
-Filename:
-
-`polymarket-bridge-0.1.0-dev.zip`
+`Yandex-Marketing-Bridge-0.1.9.zip`
 
 SHA-256:
 
-`2754c1c9bc9ab0d16afd8ddef5dbddc82ae64bf5b026062f86ff318cfdffe96a`
+`de4425a47645d537ef7b69994ef2df0f66c3e9bd6741b0b47884426bdd954c4c`
 
-The ZIP is built from `src/` with `manifest.json` at archive root.
+## 0.1.1 changes
 
-## Still not claimed
+- Manual action placement changed to the Yandex 0.1.9 overlay/layout model: fixed Shadow-DOM action surface, anchored to the code block's top-right geometry and repositioned on scroll/resize.
+- Large multi-command results no longer return `DELIVERY_TOO_LARGE`.
+- When serialized chat delivery exceeds 160,000 characters, the complete result is serialized as one JSON artifact.
+- Artifact persistence uses IndexedDB, ~256 KiB chunks, per-chunk SHA-256 and TTL cleanup.
+- Content runtime fetches chunks one-by-one, verifies metadata and SHA-256, creates a browser `File`, injects it into the ChatGPT file input using `DataTransfer`, and waits for a ready attachment preview.
+- Attachment delivery has durable phases and a Send commit barrier. After Send dispatch, automatic duplicate Send is forbidden.
+- Temporary artifact chunks are deleted only after the resulting user-turn is confirmed.
+- Full-corpus statistical analysis remains delegated to ChatGPT Work.
 
-This checkpoint is **not** a browser live-acceptance PASS yet.
+## CI acceptance
 
-Still required after the owner installs it:
+GitHub Actions run:
 
-1. load unpacked / install ZIP;
-2. open a concrete ChatGPT conversation;
-3. enable Manual bridge;
-4. verify separate `Polymarket` buttons appear without changing native Copy;
-5. execute a bounded public API smoke command;
-6. verify exactly one provider call and one result delivery into the same conversation;
-7. verify a two-command block executes in source order;
-8. verify malformed command returns a chat-visible controlled error with zero provider request;
-9. verify a result-too-large case fails boundedly rather than materializing an unsafe file transport.
+`35316206939`
 
-Authenticated/private reads and all trading remain out of scope.
+Commit tested:
+
+`69fe97e0f7bf7402b1b3f8b8072746c5aada0afa`
+
+Job:
+
+`105508282829`
+
+Result: **SUCCESS**
+
+Passed steps:
+
+- JavaScript syntax checks;
+- manifest parse;
+- protocol tests;
+- file-delivery contract tests;
+- installable ZIP build;
+- artifact upload.
+
+## Exact installable ZIP
+
+Inner installable ZIP SHA-256:
+
+`6b059ecd3b75c40ad38c840606d5bf90063913c35e6f83f02a7c9cd5c744f8d4`
+
+GitHub Actions artifact archive SHA-256:
+
+`7ff35833b4aba11691c223819b8a58de41ca1440bed9cea54ea9b20bc9218aa6`
+
+The installable ZIP contains `manifest.json` at archive root.
+
+## Required live acceptance for 0.1.1
+
+1. Update/reinstall the extension from the 0.1.1 ZIP.
+2. Confirm the Polymarket action is positioned at the code block's top-right area instead of a separate row.
+3. Re-run the previous five-command batch that produced ~282k serialized characters.
+4. Expected result: a short Polymarket Bridge summary **plus a JSON attachment**, not `DELIVERY_TOO_LARGE`.
+5. Open the attachment and verify it contains all five result envelopes.
+6. Confirm only one ChatGPT user-turn is sent and no duplicate Send occurs.
