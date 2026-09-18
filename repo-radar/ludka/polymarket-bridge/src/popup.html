@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Polymarket Bridge</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <h1>Polymarket Bridge</h1>
+    <p class="muted">v0.1.0 · public read-only</p>
+    <section class="card">
+      <div id="conversation">Проверяю текущий диалог…</div>
+      <label class="toggle"><input id="manual" type="checkbox" disabled><span>Manual bridge</span></label>
+      <p class="muted">При включении у code blocks появится отдельная кнопка <b>Polymarket</b>. Native Copy не изменяется.</p>
+    </section>
+    <section class="card">
+      <b>Credentials</b>
+      <p class="muted">Не нужны в v0.1.0. Приватные ключи в расширение не вводятся.</p>
+    </section>
+    <div id="status" class="status"></div>
+  </main>
+  <script src="conversation_identity.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
