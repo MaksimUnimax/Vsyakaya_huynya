@@ -33,3 +33,15 @@ jobs:
         run: node repo-radar/ludka/polymarket-bridge/tests/protocol.test.mjs
       - name: File-delivery contract tests
         run: node repo-radar/ludka/polymarket-bridge/tests/file_delivery_contract.test.mjs
+      - name: Build installable ZIP
+        run: |
+          cd repo-radar/ludka/polymarket-bridge/src
+          zip -r ../polymarket-bridge-0.1.1.zip .
+          cd ..
+          sha256sum polymarket-bridge-0.1.1.zip
+      - name: Upload installable ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: polymarket-bridge-0.1.1
+          path: repo-radar/ludka/polymarket-bridge/polymarket-bridge-0.1.1.zip
+          if-no-files-found: error
