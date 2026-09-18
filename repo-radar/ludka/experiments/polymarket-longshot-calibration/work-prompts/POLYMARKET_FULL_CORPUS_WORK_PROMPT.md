@@ -46,6 +46,7 @@ Acquire the full accessible resolved-market corpus for the declared run window. 
 Required source classes where available:
 
 - Gamma market/event metadata and pagination;
+- per-market fee fields / fee schedule metadata and whether fees are enabled;
 - YES/NO token ids and outcome ordering;
 - historical token price observations;
 - public trade/activity data when available;
@@ -61,8 +62,9 @@ Do not invent historical order-book queue state that the source does not provide
 3. Treat negative-risk / multi-market events explicitly; do not silently flatten them into independent binary observations.
 4. Deduplicate markets and observations using stable ids.
 5. Record missing-history coverage by market age/horizon.
-6. Record every API failure and retry; never silently drop failed pages.
-7. Freeze retrieval timestamp and endpoint/parameter manifest.
+6. Preserve fee metadata per market. Never substitute one global fee model where source metadata differs by market.
+7. Record every API failure and retry; never silently drop failed pages.
+8. Freeze retrieval timestamp and endpoint/parameter manifest.
 
 If any integrity gate materially fails, stop statistical interpretation and report the failure rather than guessing.
 
