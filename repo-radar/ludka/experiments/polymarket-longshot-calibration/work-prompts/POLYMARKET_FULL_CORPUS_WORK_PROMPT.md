@@ -41,6 +41,42 @@ If the data reveals that another large-data pass is needed, Work may describe th
 
 Main Chat will review the Work return, determine acceptance, and issue any next Work prompt.
 
+## GITHUB / ARTIFACT HANDOFF BOUNDARY — WORK IS READ-ONLY
+
+ChatGPT Work MUST treat the GitHub repository as **READ-ONLY** for this task.
+
+Work MUST NOT:
+- commit files;
+- push commits;
+- create or update GitHub files;
+- open pull requests;
+- upload generated result artifacts to GitHub;
+- modify repository state through any connector, browser, API or git command;
+- decide final repository placement on its own.
+
+Work MAY:
+- read the repository and current project files;
+- use repository contents as input/context;
+- state proposed destination paths for generated artifacts;
+- report the repository branch/head it used as read-only input.
+
+All generated outputs must be returned to Main Chat / the owner as **downloadable Work/chat artifacts**.
+
+The required handoff is:
+
+1. Generate the complete result files in Work's own execution environment.
+2. Return each material output to the chat as a downloadable file/artifact.
+3. Provide filename, schema, row count, byte size and SHA-256 for every material artifact.
+4. Provide a manifest that lists **proposed** repository destination paths, but do not write them there.
+5. Provide one compact terminal report with download links/artifact names.
+6. Stop.
+
+The owner will download the files and manually upload them to GitHub.
+
+After the owner uploads them, Main Chat will inspect the uploaded files, decide final repository placement, distribute/rename them as needed, review acceptance, and issue any next Work task.
+
+Work MUST NOT treat file generation as incomplete merely because it did not write to GitHub. Successful completion means the artifacts were generated, hashed, described and returned to the owner/Main Chat for manual upload.
+
 ## Purpose
 
 Test whether Polymarket exhibits stable probability miscalibration analogous in method (not assumed result) to the `mpatout/kalshi-market-research` longshot-bias study.
@@ -171,9 +207,9 @@ Maker simulation requires contemporaneous queue/order-book evidence. If unavaila
 
 ## Outputs
 
-Write under the experiment root only.
+Generate the following as **downloadable Work/chat artifacts**. Do NOT write or commit them to GitHub.
 
-Required:
+Required artifact set:
 
 - `data/manifests/<work_id>.json`
 - normalized market table (Parquet preferred; CSV acceptable if bounded)
@@ -183,9 +219,20 @@ Required:
 - `evidence/<work_id>_QA.md`
 - `evidence/<work_id>_RESULTS.md`
 
-For files too large for Git, retain them as Work artifacts and commit only manifest/hash/schema/row counts plus any bounded derived tables that are suitable for Git.
+These paths are **proposed repository destinations only**. They describe where Main Chat may later place the files after the owner manually uploads them.
+
+For every material artifact return:
+- downloadable artifact/file link or Work artifact name;
+- exact filename;
+- proposed repository destination path;
+- byte size;
+- row count where applicable;
+- schema where applicable;
+- SHA-256.
 
 Every material data file must have SHA-256 in the manifest.
+
+Do NOT commit, push, upload to GitHub, create a PR, or otherwise mutate repository state.
 
 ## Reporting standard
 
